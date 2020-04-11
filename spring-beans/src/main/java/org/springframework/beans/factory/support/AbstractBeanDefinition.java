@@ -162,6 +162,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private final Map<String, AutowireCandidateQualifier> qualifiers = new LinkedHashMap<>();
 
+	/**
+	 * 创建 Bean 的 Supplier 对象
+	 */
 	@Nullable
 	private Supplier<?> instanceSupplier;
 
@@ -594,7 +597,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see #AUTOWIRE_BY_TYPE
 	 */
 	public int getResolvedAutowireMode() {
-		if (this.autowireMode == AUTOWIRE_AUTODETECT) {
+		if (this.autowireMode == AUTOWIRE_AUTODETECT) {   // 自动检测模式，获得对应的检测模式
 			// Work out whether to apply setter autowiring or constructor autowiring.
 			// If it has a no-arg constructor it's deemed to be setter autowiring,
 			// otherwise we'll try constructor autowiring.
@@ -1110,6 +1113,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public void prepareMethodOverrides() throws BeanDefinitionValidationException {
 		// Check that lookup methods exist and determine their overloaded status.
 		if (hasMethodOverrides()) {
+			// 循环，执行 prepareMethodOverride
 			getMethodOverrides().getOverrides().forEach(this::prepareMethodOverride);
 		}
 	}

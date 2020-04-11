@@ -11,4 +11,22 @@
 
 	<myTag:user id="user" email="12233445566@qq.com" userName="chenssy"/>
 
+	<bean id = "myApplicationAware" class="com.example.demo.MyApplicationAware"/>
+
+	<bean id = "beanPostProcessorTest" class="com.example.demo.BeanPostProcessorTest"/>
+
+	<bean id="initializingBeanTest" class="com.example.demo.InitializingBeanTest">
+		<property name="name" value="chenssy 1 号"/>
+	</bean>
+
+	<bean id="initializingBeanTest2" class="com.example.demo.InitializingBeanTest2"
+		  init-method="setOtherName">
+		<property name="name" value="chenssy 1 号"/>
+	</bean>
+
+	<bean id="lifeCycle" class="com.example.demo.LifeCycleBean"
+		  init-method="initMethod" destroy-method="destroyMethod">
+		<property name="test" value="test"/>
+	</bean>
+
 </beans>

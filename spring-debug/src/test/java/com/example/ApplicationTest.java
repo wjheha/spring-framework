@@ -3,6 +3,7 @@ package com.example;
 import com.example.beans.Hello;
 import com.example.beans.TestBean;
 import com.example.beans.User;
+import com.example.demo.*;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -20,9 +21,8 @@ import static org.junit.Assert.assertEquals;
 public class ApplicationTest {
 
 	public static void main(String[] args) {
-		ApplicationContext ac = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
-		Hello hello = (Hello) ac.getBean("hello");
-		hello.sayHello();
+
+		System.out.println("**************************************** 0 ***********************************************");
 
 		// 根据 Xml 配置文件创建 Resource 资源对象。ClassPathResource 是 Resource 接口的子类，
 		// bean.xml 文件中的内容是我们定义的 Bean 信息。
@@ -35,15 +35,60 @@ public class ApplicationTest {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
 		// 开始 BeanDefinition 的载入和注册进程，完成后的 BeanDefinition 放置在 IoC 容器中。
 		reader.loadBeanDefinitions(resource);
+		// 测试Aware, MyApplicationAware的setApplicationContext()方法未执行，display()报空指针错误
+		MyApplicationAware applicationAware = (MyApplicationAware) factory.getBean("myApplicationAware");
+		// applicationAware.display();
+		// 测试Aware, MyApplicationAware的setApplicationContext()方法执行了，display()正常执行
+		// ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
+		// MyApplicationAware applicationAware = (MyApplicationAware) applicationContext.getBean("myApplicationAware");
+		// applicationAware.display();
+		// 测试BeanPostProcessor，一般普通的 BeanFactory 是不支持自动注册 BeanPostProcessor 的，
+		// 需要我们手动调用 #addBeanPostProcessor(BeanPostProcessor beanPostProcessor) 方法进行注册。
+		// 注册后的 BeanPostProcessor 适用于所有该 BeanFactory 创建的 bean，但是 ApplicationContext
+		// 可以在其 bean 定义中自动检测所有的 BeanPostProcessor 并自动完成注册，同时将他们应用到随后创建的任何 Bean 中
+		BeanPostProcessorTest beanPostProcessorTest = new BeanPostProcessorTest();
+		factory.addBeanPostProcessor(beanPostProcessorTest);
+		BeanPostProcessorTest test = (BeanPostProcessorTest) factory.getBean("beanPostProcessorTest");
+		test.display();
+		// 测试InitializingBean和init-method
+		InitializingBeanTest initTest = (InitializingBeanTest) factory.getBean("initializingBeanTest");
+		System.out.println("name ：" + initTest.getName());
+		InitializingBeanTest2 initTest2 = (InitializingBeanTest2) factory.getBean("initializingBeanTest2");
+		System.out.println("name ：" + initTest2.getName());
+		// BeanFactory 容器一定要调用该方法进行 BeanPostProcessor 注册
+		factory.addBeanPostProcessor(new LifeCycleBean());
+		LifeCycleBean lifeCycleBean = (LifeCycleBean) factory.getBean("lifeCycle");
+		lifeCycleBean.display();
+		System.out.println("方法调用完成，容器开始关闭....");
+		// 关闭容器
+		factory.destroySingletons();
+		// 显示分隔符 //
+		System.out.println("**************************************** 1 ***********************************************");
 
+
+		ApplicationContext ac = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+		Hello hello = (Hello) ac.getBean("hello");
+		hello.sayHello();
+		// 显示分隔符 //
+		System.out.println("**************************************** 2 ***********************************************");
+
+
+		// XmlBeanFactory继承自DefaultListableBeanFactory，而DefaultListableBeanFactory是整个bean加载的核心部分，
+		// 是Spring注册及加载bean的默认实现，而对于XmlBeanFactory和DefaultListableBeanFactory不同的地方其实是在XmlBeanFactory中
+		// 使用了自定义的XML读取器XmlBeanDefinitionReader，实现了个性化的BeanDefinitionReader读取。
 		BeanFactory beanFactory = new XmlBeanFactory(new ClassPathResource("applicationContext.xml"));
 		TestBean bean = (TestBean) beanFactory.getBean("testBean");
 		System.out.println(bean.getTestStr());
 		assertEquals("testStr", bean.getTestStr());
+		// 显示分隔符 //
+		System.out.println("**************************************** 3 ***********************************************");
 
-		//自定义标签使用
+
+		// 自定义标签使用
 		ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
 		User user = (User) context.getBean("user");
 		System.out.println(user.getUserName() + "----" + user.getEmail());
+		// 显示分隔符 //
+		System.out.println("**************************************** 4 ***********************************************");
 	}
 }
