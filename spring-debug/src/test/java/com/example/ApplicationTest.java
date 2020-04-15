@@ -4,6 +4,7 @@ import com.example.beans.Hello;
 import com.example.beans.TestBean;
 import com.example.beans.User;
 import com.example.demo.*;
+import com.example.service.StudentService;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -59,6 +60,11 @@ public class ApplicationTest {
 		factory.addBeanPostProcessor(new LifeCycleBean());
 		LifeCycleBean lifeCycleBean = (LifeCycleBean) factory.getBean("lifeCycle");
 		lifeCycleBean.display();
+		// 对于 BeanFactory 容器来说，BeanFactoryPostProcessor 一样需要容器主动去进行注册调用，方法如下：
+		BeanFactoryPostProcessor_1 beanFactoryPostProcessor1 = new BeanFactoryPostProcessor_1();
+		BeanFactoryPostProcessor_2 beanFactoryPostProcessor2 = new BeanFactoryPostProcessor_2();
+		beanFactoryPostProcessor1.postProcessBeanFactory(factory);
+		beanFactoryPostProcessor2.postProcessBeanFactory(factory);
 		System.out.println("方法调用完成，容器开始关闭....");
 		// 关闭容器
 		factory.destroySingletons();
@@ -66,9 +72,19 @@ public class ApplicationTest {
 		System.out.println("**************************************** 1 ***********************************************");
 
 
-		ApplicationContext ac = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
-		Hello hello = (Hello) ac.getBean("hello");
+		ApplicationContext context = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+		Hello hello = (Hello) context.getBean("hello");
 		hello.sayHello();
+		StudentService studentService = (StudentService) context.getBean("studentService");
+		System.out.println("student name:" + studentService.getName() + "-- age:" + studentService.getAge());
+		StudentService studentService2 = (StudentService) context.getBean("studentService2");
+		System.out.println("student name:" + studentService2.getName() + "-- age:" + studentService2.getAge());
+		// 测试xml配置文件中两个同类型bean
+		System.out.println(studentService.toString() + "---" + studentService2.toString());
+		StudentService studentService3 = (StudentService) context.getBean("student");
+		System.out.println("student name:" + studentService3.getName());
+		StudentService studentService4 = (StudentService) context.getBean("student2");
+		System.out.println("student name:" + studentService4.getName());
 		// 显示分隔符 //
 		System.out.println("**************************************** 2 ***********************************************");
 
@@ -85,8 +101,8 @@ public class ApplicationTest {
 
 
 		// 自定义标签使用
-		ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
-		User user = (User) context.getBean("user");
+		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
+		User user = (User) applicationContext.getBean("user");
 		System.out.println(user.getUserName() + "----" + user.getEmail());
 		// 显示分隔符 //
 		System.out.println("**************************************** 4 ***********************************************");

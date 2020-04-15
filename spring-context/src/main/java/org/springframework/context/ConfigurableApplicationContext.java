@@ -96,12 +96,15 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	String SHUTDOWN_HOOK_THREAD_NAME = "SpringContextShutdownHook";
 
 
+	// 为 ApplicationContext 设置唯一 ID
 	/**
 	 * Set the unique id of this application context.
 	 * @since 3.0
 	 */
 	void setId(String id);
 
+	// 为 ApplicationContext 设置 parent
+	// 父类不应该被修改：如果创建的对象不可用时，则应该在构造函数外部设置它
 	/**
 	 * Set the parent of this application context.
 	 * <p>Note that the parent shouldn't be changed: It should only be set outside
@@ -112,6 +115,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	void setParent(@Nullable ApplicationContext parent);
 
+	// 设置 Environment
 	/**
 	 * Set the {@code Environment} for this application context.
 	 * @param environment the new environment
@@ -119,6 +123,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	void setEnvironment(ConfigurableEnvironment environment);
 
+	// 获取 Environment
 	/**
 	 * Return the {@code Environment} for this application context in configurable
 	 * form, allowing for further customization.
@@ -127,6 +132,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	@Override
 	ConfigurableEnvironment getEnvironment();
 
+	// 添加 BeanFactoryPostProcessor
 	/**
 	 * Add a new BeanFactoryPostProcessor that will get applied to the internal
 	 * bean factory of this application context on refresh, before any of the
@@ -135,6 +141,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor postProcessor);
 
+	// 添加 ApplicationListener
 	/**
 	 * Add a new ApplicationListener that will be notified on context events
 	 * such as context refresh and context shutdown.
@@ -147,6 +154,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	void addApplicationListener(ApplicationListener<?> listener);
 
+	// 添加 ProtocolResolver
 	/**
 	 * Register the given protocol resolver with this application context,
 	 * allowing for additional resource protocols to be handled.
@@ -156,6 +164,8 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	void addProtocolResolver(ProtocolResolver resolver);
 
+	// 加载或者刷新配置
+	// 这是一个非常重要的方法
 	/**
 	 * Load or refresh the persistent representation of the configuration,
 	 * which might an XML file, properties file, or relational database schema.
@@ -168,6 +178,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	void refresh() throws BeansException, IllegalStateException;
 
+	// 注册 shutdown hook
 	/**
 	 * Register a shutdown hook with the JVM runtime, closing this context
 	 * on JVM shutdown unless it has already been closed at that time.
@@ -180,6 +191,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	void registerShutdownHook();
 
+	// 关闭 ApplicationContext
 	/**
 	 * Close this application context, releasing all resources and locks that the
 	 * implementation might hold. This includes destroying all cached singleton beans.
@@ -191,6 +203,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	@Override
 	void close();
 
+	// ApplicationContext 是否处于激活状态
 	/**
 	 * Determine whether this application context is active, that is,
 	 * whether it has been refreshed at least once and has not been closed yet.
@@ -201,6 +214,7 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 */
 	boolean isActive();
 
+	// 获取当前上下文的 BeanFactory
 	/**
 	 * Return the internal bean factory of this application context.
 	 * Can be used to access specific functionality of the underlying factory.

@@ -29,4 +29,73 @@
 		<property name="test" value="test"/>
 	</bean>
 
+	<bean id="studentService" class="com.example.service.StudentService">
+		<property name="name" value="chenssy"/>
+		<property name="age" value="10"/>
+	</bean>
+
+	<bean class="com.example.demo.BeanFactoryPostProcessor_1"/>
+	<bean class="com.example.demo.BeanFactoryPostProcessor_2"/>
+
+	<bean id="propertyPlaceholderConfigurer" class="com.example.demo.CustomPropertyConfig">
+		<property name="locations">
+			<list>
+				<value>classpath:config/application-dev.properties</value>
+				<value>classpath:config/application-test.properties</value>
+				<value>classpath:config/application-prod.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="studentService2" class="com.example.service.StudentService">
+		<property name="name" value="${student.name}"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:config/application.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="student" class="com.example.service.StudentService">
+		<property name="name" value="chenssy"/>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:config/application1.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:config/application2.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="student2" class="com.example.service.StudentService">
+		<!--
+		如果PropertyOverrideConfigurer 先作用，那么 PropertyPlaceholderConfigurer 在匹配占位符的时候就找不到了
+		<property name="name" value="${studentService.name}"/>
+		-->
+		<property name="name" value="${student.name}"/>
+	</bean>
+
+	<bean id="conversionService"
+		  class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<set>
+				<ref bean="studentConversionService"/>
+			</set>
+		</property>
+	</bean>
+
+	<bean id="studentConversionService" class="com.example.demo.StudentConversionService"/>
+
 </beans>

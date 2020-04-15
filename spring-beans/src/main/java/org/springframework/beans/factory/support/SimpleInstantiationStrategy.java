@@ -183,6 +183,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 				}
 			}
 		}
+		// 一大堆 catch 异常
 		catch (IllegalArgumentException ex) {
 			throw new BeanInstantiationException(factoryMethod,
 					"Illegal arguments to factory method '" + factoryMethod.getName() + "'; " +

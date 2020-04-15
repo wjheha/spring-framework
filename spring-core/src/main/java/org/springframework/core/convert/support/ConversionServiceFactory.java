@@ -48,6 +48,7 @@ public final class ConversionServiceFactory {
 	public static void registerConverters(@Nullable Set<?> converters, ConverterRegistry registry) {
 		if (converters != null) {
 			for (Object converter : converters) {
+				// 遍历 converters 数组，逐个注解
 				if (converter instanceof GenericConverter) {
 					registry.addConverter((GenericConverter) converter);
 				}
