@@ -98,4 +98,5 @@
 
 	<bean id="studentConversionService" class="com.example.demo.StudentConversionService"/>
 
+	<bean id = "messageService" class="com.example.impl.MessageServiceImpl"/>
 </beans>

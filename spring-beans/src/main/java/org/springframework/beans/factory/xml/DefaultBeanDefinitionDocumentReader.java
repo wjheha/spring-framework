@@ -93,6 +93,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	@Override
 	public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) {
 		this.readerContext = readerContext;
+		// 从 xml 根节点开始解析文件
 		doRegisterBeanDefinitions(doc.getDocumentElement());
 	}
 
@@ -126,11 +127,19 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// then ultimately reset this.delegate back to its original (parent) reference.
 		// this behavior emulates a stack of delegates without actually necessitating one.
 		// 记录老的 BeanDefinitionParserDelegate 对象
+		// 我们看名字就知道，BeanDefinitionParserDelegate 必定是一个重要的类，它负责解析 Bean 定义，
+		// 这里为什么要定义一个 parent? 看到后面就知道了，是递归问题，
+		// 因为 <beans /> 内部是可以定义 <beans /> 的，所以这个方法的 root 其实不一定就是 xml 的根节点，
+		// 也可以是嵌套在里面的 <beans /> 节点，从源码分析的角度，我们当做根节点就好了
+
 		BeanDefinitionParserDelegate parent = this.delegate;
 		// <1> 创建 BeanDefinitionParserDelegate 对象，并进行设置到 delegate
 		this.delegate = createDelegate(getReaderContext(), root, parent);
 		// <2> 检查 <beans /> 根标签的命名空间是否为空，或者是 http://www.springframework.org/schema/beans
 		if (this.delegate.isDefaultNamespace(root)) {
+			// 这块说的是根节点 <beans ... profile="dev" /> 中的 profile 是否是当前环境需要的，
+			// 如果当前环境配置的 profile 不包含此 profile，那就直接 return 了，不对此 <beans /> 解析
+			// 不熟悉 profile 为何物，不熟悉怎么配置 profile 读者的请移步附录区
 			// <2.1> 处理 profile 属性。可参见《Spring3自定义环境配置 <beans profile="">》http://nassir.iteye.com/blog/1535799
 			String profileSpec = root.getAttribute(PROFILE_ATTRIBUTE);
 			if (StringUtils.hasText(profileSpec)) {
@@ -150,11 +159,11 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			}
 		}
 
-		// <3> 解析前处理,目前 Spring 中是空实现
+		// <3> 钩子，解析前处理,目前 Spring 中是空实现
 		preProcessXml(root);
 		// <4> 解析
 		parseBeanDefinitions(root, this.delegate);
-		// <5> 解析后处理,目前 Spring 中是空实现
+		// <5> 钩子，解析后处理,目前 Spring 中是空实现
 		postProcessXml(root);
 
 		// 设置 delegate 回老的 BeanDefinitionParserDelegate 对象
@@ -171,6 +180,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		return delegate;
 	}
 
+	// default namespace 涉及到的就四个标签 <import />、<alias />、<bean /> 和 <beans />，
+	// 其他的属于 custom 的
 	/**
 	 * Parse the elements at the root level in the document:
 	 * "import", "alias", "bean".
@@ -204,16 +215,21 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {  //import
+			// 处理 <import /> 标签
 			importBeanDefinitionResource(ele);
 		}
 		else if (delegate.nodeNameEquals(ele, ALIAS_ELEMENT)) {  //alias
+			// 处理 <alias /> 标签定义
+			// <alias name="fromName" alias="toName"/>
 			processAliasRegistration(ele);
 		}
 		else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {  //bean
+			// 处理 <bean /> 标签定义，这也算是我们的重点吧
 			processBeanDefinition(ele, delegate);
 		}
 		else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {  //beans
 			// recurse
+			// 如果碰到的是嵌套的 <beans /> 标签，需要递归
 			doRegisterBeanDefinitions(ele);
 		}
 	}

@@ -4,6 +4,7 @@ import com.example.beans.Hello;
 import com.example.beans.TestBean;
 import com.example.beans.User;
 import com.example.demo.*;
+import com.example.interfaces.MessageService;
 import com.example.service.StudentService;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -106,5 +107,16 @@ public class ApplicationTest {
 		System.out.println(user.getUserName() + "----" + user.getEmail());
 		// 显示分隔符 //
 		System.out.println("**************************************** 4 ***********************************************");
+
+
+		// 用我们的配置文件来启动一个 ApplicationContext
+		ApplicationContext contextApp = new ClassPathXmlApplicationContext("classpath:applicationContext.xml");
+
+		System.out.println("context 启动成功");
+
+		// 从 context 中取出我们的 Bean，而不是用 new MessageServiceImpl() 这种方式
+		MessageService messageService = contextApp.getBean(MessageService.class);
+		// 这句将输出: hello world
+		System.out.println(messageService.getMessage());
 	}
 }

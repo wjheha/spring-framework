@@ -70,6 +70,10 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	}
 
 	/**
+	 * 此函数主要用于解析给定的路径数组，当然，如果数组中包含特殊符号，如${var}，那么
+	 * 在resolvePath中会搜寻匹配的系统变量并替换。
+	 */
+	/**
 	 * Set the config locations for this application context.
 	 * <p>If not set, the implementation may use a default as appropriate.
 	 */
