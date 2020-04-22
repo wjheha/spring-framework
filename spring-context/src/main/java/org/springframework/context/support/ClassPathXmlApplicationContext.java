@@ -65,6 +65,7 @@ import org.springframework.util.Assert;
  */
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
 
+	// 配置文件资源对象数组
 	@Nullable
 	private Resource[] configResources;
 
