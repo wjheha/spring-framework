@@ -68,6 +68,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 		// Determine list of advisor bean names, if not cached already.
 		String[] advisorNames = this.cachedAdvisorBeanNames;
 		if (advisorNames == null) {
+			// 获取所有的beanName
 			// Do not initialize FactoryBeans here: We need to leave all regular beans
 			// uninitialized to let the auto-proxy creator apply to them!
 			advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
@@ -78,8 +79,10 @@ public class BeanFactoryAdvisorRetrievalHelper {
 			return new ArrayList<>();
 		}
 
+		// 循环所有的beanName 找出对应的增强方法
 		List<Advisor> advisors = new ArrayList<>();
 		for (String name : advisorNames) {
+			//不合法的bean 则略过，由子类定义规则，默认返回true
 			if (isEligibleBean(name)) {
 				if (this.beanFactory.isCurrentlyInCreation(name)) {
 					if (logger.isTraceEnabled()) {

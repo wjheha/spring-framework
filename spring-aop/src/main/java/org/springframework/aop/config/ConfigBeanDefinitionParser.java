@@ -103,6 +103,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 				new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
 		parserContext.pushContainingComponent(compositeDef);
 
+		// 向Spring容器注册了一个BeanName为org.springframework.aop.config.internalAutoProxyCreator的Bean定义，
+		// 可以自定义也可以使用Spring提供的（根据优先级来)
+		// 在这个方法里面也会根据配置proxy-target-class和expose-proxy，设置是否使用CGLIB进行代理以及是否暴露最终的代理。
 		configureAutoProxyCreator(parserContext, element);
 
 		List<Element> childElts = DomUtils.getChildElements(element);
@@ -260,6 +263,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
+	 * 这个for循环只用来处理<aop:aspect>标签下的<aop:before>、<aop:after>、<aop:after-returning>、
+	 * <aop:after-throwing method="">、<aop:around method="">这五个标签的
+	 */
+	/**
 	 * Return {@code true} if the supplied node describes an advice type. May be one of:
 	 * '{@code before}', '{@code after}', '{@code after-returning}',
 	 * '{@code after-throwing}' or '{@code around}'.
@@ -306,6 +313,13 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		return definition;
 	}
 
+	/**
+	 * 方法主要做了三件事：
+	 *
+	 * 1、根据织入方式（before、after这些）创建RootBeanDefinition，名为adviceDef即advice定义
+	 * 2、将上一步创建的RootBeanDefinition写入一个新的RootBeanDefinition，构造一个新的对象，名为advisorDefinition，即advisor定义
+	 * 3、将advisorDefinition注册到DefaultListableBeanFactory中
+	 */
 	/**
 	 * Parses one of '{@code before}', '{@code after}', '{@code after-returning}',
 	 * '{@code after-throwing}' or '{@code around}' and registers the resulting

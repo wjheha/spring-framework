@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<aop:aspectj-autoproxy/>
+
+	<bean id="test" class="com.example.aop.TestBean"/>
+	<bean class="com.example.aop.AspectJTest"/>
+
+	<bean id="daoImpl" class="com.example.aop.DaoImpl"/>
+	<bean id="timeHandler" class="com.example.aop.TimeHandler"/>
+
+	<aop:config proxy-target-class="true">
+		<aop:aspect id="time" ref="timeHandler">
+			<aop:pointcut id="addAllMethod" expression="execution(* com.example.aop.Dao.*(..))"/>
+			<aop:before method="printTime" pointcut-ref="addAllMethod"/>
+			<aop:after method="printTime" pointcut-ref="addAllMethod"/>
+		</aop:aspect>
+	</aop:config>
+
+</beans>
