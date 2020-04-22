@@ -162,12 +162,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** Logger used by this class. Available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	// 上下文使用的唯一Id，标识此ApplicationContext
 	/** Unique id for this context, if any. */
 	private String id = ObjectUtils.identityToString(this);
 
 	/** Display name. */
 	private String displayName = ObjectUtils.identityToString(this);
 
+	// 父级ApplicationContext
 	/** Parent context. */
 	@Nullable
 	private ApplicationContext parent;
@@ -176,6 +178,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Nullable
 	private ConfigurableEnvironment environment;
 
+	// 存储BeanFactoryPostProcessor接口，Spring提供的一个扩展点
 	/** BeanFactoryPostProcessors to apply on refresh. */
 	private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
@@ -188,28 +191,35 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/** Flag that indicates whether this context has been closed already. */
 	private final AtomicBoolean closed = new AtomicBoolean();
 
+	// refresh方法和destory方法公用的一个监视器，避免两个方法同时执行
 	/** Synchronization monitor for the "refresh" and "destroy". */
 	private final Object startupShutdownMonitor = new Object();
 
+	// Spring提供的一个钩子，JVM停止执行时会运行Thread里面的方法
 	/** Reference to the JVM shutdown hook, if registered. */
 	@Nullable
 	private Thread shutdownHook;
 
+	// 上下文使用的资源格式解析器
 	/** ResourcePatternResolver used by this context. */
 	private ResourcePatternResolver resourcePatternResolver;
 
+	// 用于管理Bean生命周期的生命周期处理器接口
 	/** LifecycleProcessor for managing the lifecycle of beans within this context. */
 	@Nullable
 	private LifecycleProcessor lifecycleProcessor;
 
+	// 用于实现国际化的一个接口
 	/** MessageSource we delegate our implementation of this interface to. */
 	@Nullable
 	private MessageSource messageSource;
 
+	// Spring提供的事件管理机制中的事件多播器接口
 	/** Helper class used in event publishing. */
 	@Nullable
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
+	// Spring提供的事件管理机制中的应用监听器
 	/** Statically specified listeners. */
 	private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 

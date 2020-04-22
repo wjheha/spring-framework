@@ -70,10 +70,12 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	@Nullable
 	private Boolean allowCircularReferences;
 
+	// 上下文使用的Bean工厂
 	/** Bean factory for this context. */
 	@Nullable
 	private DefaultListableBeanFactory beanFactory;
 
+	// Bean工厂使用的同步监视器
 	/** Synchronization monitor for the internal BeanFactory. */
 	private final Object beanFactoryMonitor = new Object();
 
