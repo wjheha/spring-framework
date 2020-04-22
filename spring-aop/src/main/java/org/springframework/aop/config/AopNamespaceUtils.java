@@ -74,19 +74,21 @@ public abstract class AopNamespaceUtils {
 	public static void registerAspectJAnnotationAutoProxyCreatorIfNecessary(
 			ParserContext parserContext, Element sourceElement) {
 
-		// 注册或升级AutoProxyCreator,定义beanName为org.springframework.aop.config.internalAutoProxyCreator的BeanDefinition
+		// 1.注册或升级AutoProxyCreator,定义beanName为org.springframework.aop.config.internalAutoProxyCreator的BeanDefinition
 		BeanDefinition beanDefinition = AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(
 				parserContext.getRegistry(), parserContext.extractSource(sourceElement));
-		// 对于proxy-target-class 以及expose-proxy 属性的处理
+		// 2.对于proxy-target-class 以及expose-proxy 属性的处理
 		useClassProxyingIfNecessary(parserContext.getRegistry(), sourceElement);
-		// 注册组件并通知，便于监听器做进一步处理
+		// 3.注册组件并通知，便于监听器做进一步处理
 		// 其中beanDefinition的className为AnnotationAwareAspectJAutoProxyCreator
 		registerComponentIfNecessary(beanDefinition, parserContext);
 	}
 
 	private static void useClassProxyingIfNecessary(BeanDefinitionRegistry registry, @Nullable Element sourceElement) {
 		if (sourceElement != null) {
-			// 对于proxy-target-class 属性的处现
+			// 对于proxy-target-class 属性的处理，强制使用CGLIB 代理需要将＜aop:config＞的proxy-target-class 属性设为true，
+			// 当需要使用CGLIB代理和@AspectJ 自动代理支持，可以按照以下方式设置＜aop:aspectj-autoproxy＞的proxy-target-class属性：
+			// <aop:aspectJ-autoproxy proxy-target-class= ” true ” />
 			boolean proxyTargetClass = Boolean.parseBoolean(sourceElement.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE));
 			if (proxyTargetClass) {
 				AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
