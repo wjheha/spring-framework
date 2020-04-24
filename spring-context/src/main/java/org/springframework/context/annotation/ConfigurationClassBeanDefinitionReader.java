@@ -128,6 +128,8 @@ class ConfigurationClassBeanDefinitionReader {
 	private void loadBeanDefinitionsForConfigurationClass(
 			ConfigurationClass configClass, TrackedConditionEvaluator trackedConditionEvaluator) {
 
+		// 如果一个类是被  Import  进来的, 会在Spring进行标记,然后再这里完成注册
+		// @Import(aaa.class) 那这个aaa就是被Import的,在这里完成注册
 		if (trackedConditionEvaluator.shouldSkip(configClass)) {
 			String beanName = configClass.getBeanName();
 			if (StringUtils.hasLength(beanName) && this.registry.containsBeanDefinition(beanName)) {
@@ -143,8 +145,9 @@ class ConfigurationClassBeanDefinitionReader {
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
-
+		// xml
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+		// 处理注册Registrar 的逻辑
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 

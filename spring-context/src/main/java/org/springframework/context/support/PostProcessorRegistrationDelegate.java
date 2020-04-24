@@ -110,8 +110,7 @@ final class PostProcessorRegistrationDelegate {
 			// 清空，以备下次使用
 			currentRegistryProcessors.clear();
 
-			// 其次，调用是实现了 Ordered（普通排序接口）的 BeanDefinitionRegistryPostProcessors
-			// 逻辑和 上面一样
+			// 其次，调用实现了 Ordered（普通排序接口）的 BeanDefinitionRegistryPostProcessors，逻辑和上面一样
 			// Next, invoke the BeanDefinitionRegistryPostProcessors that implement Ordered.
 			postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
