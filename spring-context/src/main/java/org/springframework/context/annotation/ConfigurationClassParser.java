@@ -263,6 +263,7 @@ class ConfigurationClassParser {
 
 		if (configClass.getMetadata().isAnnotated(Component.class.getName())) {
 			// Recursively process any member (nested) classes first
+			// 首先递归地处理任何成员（嵌套）类
 			processMemberClasses(configClass, sourceClass);
 		}
 
@@ -279,21 +280,27 @@ class ConfigurationClassParser {
 			}
 		}
 
+		// 处理所有的@ComponentScan注解, 也就是读取到了我们在MainConfig中使用@ConponentScans 中添加的元信息, 如value=com.changwu
+		// basePackages  lazyInit  userDefualtFileter ,,,  includeFileters excludeFilters  scopeResolver  nameGenerate ,,,
 		// Process any @ComponentScan annotations
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
 		if (!componentScans.isEmpty() &&
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+			// 为什么要循环,因为 @ComponentScans(value={1,2,3}) value是一个数组
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
+				// 扫描包下面的普通类, 也就是添加了@Component注解的类, 然后将扫描出来的bean放到map中
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
+				// 检查扫描出来的类当中是否还有configuration
 				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 					BeanDefinition bdCand = holder.getBeanDefinition().getOriginatingBeanDefinition();
 					if (bdCand == null) {
 						bdCand = holder.getBeanDefinition();
 					}
+					//检查  看看被扫描的普通类有没有添加 配置相关的注解
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
 						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}
@@ -545,6 +552,7 @@ class ConfigurationClassParser {
 	private void processImports(ConfigurationClass configClass, SourceClass currentSourceClass,
 			Collection<SourceClass> importCandidates, boolean checkForCircularImports) {
 
+		// 如果没有添加了@Implot注解的类,直接退出去
 		if (importCandidates.isEmpty()) {
 			return;
 		}
@@ -556,20 +564,29 @@ class ConfigurationClassParser {
 			this.importStack.push(configClass);
 			try {
 				for (SourceClass candidate : importCandidates) {
+					// 情况1:　处理 @ImportSelector 注解
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
+						// 被循环获取出现在Spring自己的以及扫描出来的全部的对象的Class描述
 						Class<?> candidateClass = candidate.loadClass();
+						// 只要这个对象的@Import(value= ImportSelector.clas)就命中就反射实现一个对象,
+						// 反射创建的这个对象就是我们的手动添加的 继承 ImportSelector 的那个对象
 						ImportSelector selector = ParserStrategyUtils.instantiateClass(candidateClass, ImportSelector.class,
 								this.environment, this.resourceLoader, this.registry);
 						if (selector instanceof DeferredImportSelector) {
 							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
 						}
 						else {
+							// 回调反射出来的这个对象啊的 SelectImports() 方法,就能动态的获取出我们手动添加进去的,准备批量注入的 对象的 ClassName 数组
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
+							// 将importClassNames添加进一个list -- annotatedClasses中,然后返回出来
 							Collection<SourceClass> importSourceClasses = asSourceClasses(importClassNames);
+							// 递归调用 processImports()方法,显然,再次递归的话,传递进去的importSourceClasses就是当前的类,
+							// 如果当前类是普通类,递归时就不再来到这里了, 而是进入下面的else代码块
 							processImports(configClass, currentSourceClass, importSourceClasses, false);
 						}
 					}
+					// 情况２:　 处理@ImportBeanDefinitionRegistrar
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->
 						// delegate to it to register additional bean definitions
@@ -577,9 +594,19 @@ class ConfigurationClassParser {
 						ImportBeanDefinitionRegistrar registrar =
 								ParserStrategyUtils.instantiateClass(candidateClass, ImportBeanDefinitionRegistrar.class,
 										this.environment, this.resourceLoader, this.registry);
+						// 没有和上面一样进行回调,而是放入到一个list中
 						configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
 					}
+					// 情况3:　处理普通类
 					else {
+
+						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
+						// process it as an @Configuration class
+						// 否则，加入到importStack后调用 processConfigurationClass 进行处理
+						// processConfigurationClass() 方法就在下面,  里面主要就是把类放到configurationClasses
+						// configurationClasses是一个集合，会在后面拿出来解析成bd继而注册
+						// 可以看到普通类在扫描出来的时候就被注册了
+						// 如果是importSelector，会先放到configurationClasses后面进行出来注册
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
 						// process it as an @Configuration class
 						this.importStack.registerImport(
