@@ -492,6 +492,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 				 * 检测 beanClass 是否实现了接口，若未实现，则将
 				 * proxyFactory 的成员变量 proxyTargetClass 设为 true
 				 */
+				// 点进去稍微看一下代码就知道了，主要就两句：
+				// 1. 有接口的，调用一次或多次：proxyFactory.addInterface(ifc);
+				// 2. 没有接口的，调用：proxyFactory.setProxyTargetClass(true);
 				evaluateProxyInterfaces(beanClass, proxyFactory);
 			}
 		}

@@ -521,6 +521,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		try {
+			// 让 InstantiationAwareBeanPostProcessor 在这一步有机会返回代理
 			// <3> 实例化的前置处理
 			// 给 BeanPostProcessors 一个机会用来返回一个代理类而不是真正的类实例
 			// AOP 的功能就是基于这个地方
@@ -536,6 +537,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		try {
+			// BeanPostProcessor 是在这里面实例化后才能得到执行
 			// <4> 创建 Bean 对象
 			Object beanInstance = doCreateBean(beanName, mbdToUse, args);
 			if (logger.isTraceEnabled()) {
@@ -1158,7 +1160,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Make sure bean class is actually resolved at this point.
 			if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 				Class<?> targetType = determineTargetType(beanName, mbd);
-				// 对后处理器中的所有lnstantiationAwareBeanPostProcessor 类型的后处理器进行postProcessBeforelnstantiation 方法 和
+				// 对后处理器中的所有InstantiationAwareBeanPostProcessor 类型的后处理器进行postProcessBeforeInstantiation 方法 和
 				// BeanPostProcessor 的postProcessAfterInitialization 方法的调用
 				if (targetType != null) {
 					// 前置
