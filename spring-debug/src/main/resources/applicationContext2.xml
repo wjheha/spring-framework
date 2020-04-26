@@ -4,8 +4,9 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 	<aop:aspectj-autoproxy/>
-
+	<!-- 普通 bean，包含 AOP 切面逻辑 -->
 	<bean id="test" class="com.example.aop.TestBean"/>
+	<!-- 由 @Aspect 注解修饰的切面类 -->
 	<bean class="com.example.aop.AspectJTest"/>
 
 	<bean id="daoImpl" class="com.example.aop.DaoImpl"/>
@@ -13,6 +14,9 @@
 
 	<aop:config proxy-target-class="true">
 		<aop:aspect id="time" ref="timeHandler">
+            <!--   一个切面中配置了一个切点（PointCut）和两个通知(Advice)，
+            两个通知均引用了同一个切点，即 pointcut-ref=“addAllMethod”
+            -->
 			<aop:pointcut id="addAllMethod" expression="execution(* com.example.aop.Dao.*(..))"/>
 			<aop:before method="printTime" pointcut-ref="addAllMethod"/>
 			<aop:after method="printTime" pointcut-ref="addAllMethod"/>

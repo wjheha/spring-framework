@@ -37,6 +37,7 @@ import java.lang.reflect.AccessibleObject;
  * @author Rod Johnson
  * @see Interceptor
  */
+// 连接点，连接点是指程序执行过程中的一些点，比如方法调用，异常处理等。在 Spring AOP 中，仅支持方法级别的连接点
 public interface Joinpoint {
 
 	/**
@@ -46,6 +47,7 @@ public interface Joinpoint {
 	 * @return see the children interfaces' proceed definition
 	 * @throws Throwable if the joinpoint throws an exception
 	 */
+	/** 用于执行拦截器链中的下一个拦截器逻辑 */
 	Object proceed() throws Throwable;
 
 	/**

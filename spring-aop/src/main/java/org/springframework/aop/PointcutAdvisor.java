@@ -23,6 +23,10 @@ package org.springframework.aop;
  *
  * @author Rod Johnson
  */
+// 切面 Aspect 整合了切点(Pointcut)和通知(Advice)两个模块，切点解决了 where 问题，通知解决了 when 和 how 问题。
+// 切面 Aspect 把两者整合起来，就可以解决 对什么方法（where）在何时（when - 前置还是后置，或者环绕）执行什么样的横切逻辑（how）的三连发问题。
+// 在 AOP 中，切面只是一个概念，并没有一个具体的接口或类与此对应。
+// 不过 Spring 中倒是有一个接口的用途和切面很像，我们不妨了解一下，这个接口就是切点通知器 PointcutAdvisor
 public interface PointcutAdvisor extends Advisor {
 
 	/**
