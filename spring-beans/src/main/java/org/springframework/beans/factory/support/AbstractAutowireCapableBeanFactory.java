@@ -1950,6 +1950,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// <3> 激活用户自定义的 init 方法
 		try {
+			// 调用 bean 配置中的 init-method="xxx"
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
 		catch (Throwable ex) {
