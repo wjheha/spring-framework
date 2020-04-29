@@ -52,6 +52,7 @@ import org.springframework.util.ClassUtils;
  */
 class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
+	// 解析annotation-driven开头的标签--> {@code <tx:annotation-driven/>} tag.
 	/**
 	 * Parses the {@code <tx:annotation-driven/>} tag. Will
 	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator}
@@ -63,6 +64,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		registerTransactionalEventListenerFactory(parserContext);
 		String mode = element.getAttribute("mode");
 		if ("aspectj".equals(mode)) {
+			// 提供对AspectJ方式进行事务切入的支持
 			// mode="aspectj"
 			registerTransactionAspect(element, parserContext);
 			if (ClassUtils.isPresent("javax.transaction.Transactional", getClass().getClassLoader())) {
@@ -100,6 +102,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
+	// 当<tx:annotation-driven/>标签在不指定transaction-manager属性的时候，
+	// 会默认寻找id固定名为transactionManager的bean作为事务管理器，就是在这里实现的
 	private static void registerTransactionManager(Element element, BeanDefinition def) {
 		def.getPropertyValues().add("transactionManagerBeanName",
 				TxNamespaceHandler.getTransactionManagerName(element));

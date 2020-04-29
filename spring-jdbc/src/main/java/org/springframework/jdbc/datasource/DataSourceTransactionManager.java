@@ -270,6 +270,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			txObject.getConnectionHolder().setSynchronizedWithTransaction(true);
 			con = txObject.getConnectionHolder().getConnection();
 
+			// 设置事务的隔离级别**prepareConnectionForTransaction**
 			Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);
 			txObject.setPreviousIsolationLevel(previousIsolationLevel);
 			txObject.setReadOnly(definition.isReadOnly());
@@ -277,15 +278,16 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			// Switch to manual commit if necessary. This is very expensive in some JDBC drivers,
 			// so we don't want to do it unnecessarily (for example if we've explicitly
 			// configured the connection pool to set it already).
-			if (con.getAutoCommit()) {
-				txObject.setMustRestoreAutoCommit(true);
+			if (con.getAutoCommit()) {		 //数据库的事务为自定提交，则进入
+				txObject.setMustRestoreAutoCommit(true);		//改为spring控制提交
 				if (logger.isDebugEnabled()) {
 					logger.debug("Switching JDBC Connection [" + con + "] to manual commit");
 				}
-				con.setAutoCommit(false);
+				con.setAutoCommit(false);		//取消数据库的自动提交
 			}
 
 			prepareTransactionalConnection(con, definition);
+			//设置当前线程有事务，后续进来的线程判断的时候就可以按照这个来做判断了
 			txObject.getConnectionHolder().setTransactionActive(true);
 
 			int timeout = determineTimeout(definition);

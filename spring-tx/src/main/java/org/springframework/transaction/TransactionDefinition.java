@@ -191,6 +191,8 @@ public interface TransactionDefinition {
 	int TIMEOUT_DEFAULT = -1;
 
 
+
+	// 返回事务的传播行为
 	/**
 	 * Return the propagation behavior.
 	 * <p>Must return one of the {@code PROPAGATION_XXX} constants
@@ -204,6 +206,8 @@ public interface TransactionDefinition {
 		return PROPAGATION_REQUIRED;
 	}
 
+
+	// 返回事务的隔离级别，事务管理器根据它来控制另外一个事务可以看到本事务内的哪些数据
 	/**
 	 * Return the isolation level.
 	 * <p>Must return one of the {@code ISOLATION_XXX} constants defined on
@@ -226,6 +230,8 @@ public interface TransactionDefinition {
 		return ISOLATION_DEFAULT;
 	}
 
+
+	// 返回事务必须在多少秒内完成
 	/**
 	 * Return the transaction timeout.
 	 * <p>Must return a number of seconds, or {@link #TIMEOUT_DEFAULT}.
@@ -241,6 +247,8 @@ public interface TransactionDefinition {
 		return TIMEOUT_DEFAULT;
 	}
 
+
+	// 返回是否优化为只读事务。
 	/**
 	 * Return whether to optimize as a read-only transaction.
 	 * <p>The read-only flag applies to any transaction context, whether backed
@@ -262,6 +270,8 @@ public interface TransactionDefinition {
 		return false;
 	}
 
+
+	//返回事务的名字
 	/**
 	 * Return the name of this transaction. Can be {@code null}.
 	 * <p>This will be used as the transaction name to be shown in a

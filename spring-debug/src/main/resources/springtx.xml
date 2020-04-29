@@ -6,15 +6,15 @@
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/beans/spring-tx.xsd">
 
 
-<!--	<tx:annotation-driven transaction-manager="transactionManager"/>-->
-
-<!--	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">-->
-<!--		<property name="dataSource" ref="datasource"/>-->
+<!--	<tx:annotation-driven transaction-manager="transactionManager1"/>-->
+<!--	<bean id="transactionManager1"-->
+<!--		  class="org.springframework.jdbc.datasource.DataSourceTransactionManager">-->
+<!--		<property name="dataSource" ref="dataSource1"/>-->
 <!--	</bean>-->
-
-<!--	&lt;!&ndash; 配置数据源 &ndash;&gt;-->
-<!--	<bean id = "datasource" class="org.apache.commons."-->
-
-<!--	</beans>-->
+<!--	<tx:annotation-driven transaction-manager="transactionManager2"/>-->
+<!--	<bean id="transactionManager2"-->
+<!--		  class="org.springframework.jdbc.datasource.DataSourceTransactionManager">-->
+<!--		<property name="dataSource" ref="dataSource2"/>-->
+<!--	</bean>-->
 
 </beans>

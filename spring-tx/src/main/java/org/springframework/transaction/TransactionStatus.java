@@ -38,6 +38,7 @@ import java.io.Flushable;
  */
 public interface TransactionStatus extends TransactionExecution, SavepointManager, Flushable {
 
+	// 是否有恢复点
 	/**
 	 * Return whether this transaction internally carries a savepoint,
 	 * that is, has been created as nested transaction based on a savepoint.
