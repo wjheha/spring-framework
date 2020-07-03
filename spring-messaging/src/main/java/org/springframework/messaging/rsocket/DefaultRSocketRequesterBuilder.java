@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import io.rsocket.Payload;
-import io.rsocket.RSocketFactory;
+import io.rsocket.RSocket;
 import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.transport.netty.client.WebsocketClientTransport;
+import io.rsocket.util.DefaultPayload;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ReactiveAdapter;
@@ -43,6 +45,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -56,9 +59,16 @@ import org.springframework.util.MimeTypeUtils;
  */
 final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
+	private final static boolean rsocketConnectorPresent =
+			ClassUtils.isPresent("io.rsocket.core.RSocketConnector",
+					DefaultRSocketRequesterBuilder.class.getClassLoader());
+
+
 	private static final Map<String, Object> HINTS = Collections.emptyMap();
 
 	private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+
+	private static final Payload EMPTY_SETUP_PAYLOAD = DefaultPayload.create(EMPTY_BYTE_ARRAY);
 
 
 	@Nullable
@@ -84,7 +94,10 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	private List<Consumer<RSocketStrategies.Builder>> strategiesConfigurers = new ArrayList<>();
 
-	private List<ClientRSocketFactoryConfigurer> rsocketConfigurers = new ArrayList<>();
+	private List<RSocketConnectorConfigurer> rsocketConnectorConfigurers = new ArrayList<>();
+
+	@SuppressWarnings("deprecation")
+	private List<ClientRSocketFactoryConfigurer> rsocketFactoryConfigurers = new ArrayList<>();
 
 
 	@Override
@@ -133,8 +146,15 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 	}
 
 	@Override
+	public RSocketRequester.Builder rsocketConnector(RSocketConnectorConfigurer configurer) {
+		this.rsocketConnectorConfigurers.add(configurer);
+		return this;
+	}
+
+	@Override
+	@Deprecated
 	public RSocketRequester.Builder rsocketFactory(ClientRSocketFactoryConfigurer configurer) {
-		this.rsocketConfigurers.add(configurer);
+		this.rsocketFactoryConfigurers.add(configurer);
 		return this;
 	}
 
@@ -156,36 +176,36 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 
 	@Override
 	public Mono<RSocketRequester> connect(ClientTransport transport) {
-		return Mono.defer(() -> doConnect(transport));
-	}
-
-	private Mono<RSocketRequester> doConnect(ClientTransport transport) {
 		RSocketStrategies rsocketStrategies = getRSocketStrategies();
 		Assert.isTrue(!rsocketStrategies.encoders().isEmpty(), "No encoders");
 		Assert.isTrue(!rsocketStrategies.decoders().isEmpty(), "No decoders");
-
-		RSocketFactory.ClientRSocketFactory factory = RSocketFactory.connect();
-		this.rsocketConfigurers.forEach(configurer -> configurer.configure(factory));
-
-		if (rsocketStrategies.dataBufferFactory() instanceof NettyDataBufferFactory) {
-			factory.frameDecoder(PayloadDecoder.ZERO_COPY);
-		}
 
 		MimeType metaMimeType = this.metadataMimeType != null ? this.metadataMimeType :
 				MimeTypeUtils.parseMimeType(WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
 
 		MimeType dataMimeType = getDataMimeType(rsocketStrategies);
-		factory.dataMimeType(dataMimeType.toString());
-		factory.metadataMimeType(metaMimeType.toString());
+		Mono<Payload> setupPayload = getSetupPayload(dataMimeType, metaMimeType, rsocketStrategies);
 
-		return getSetupPayload(dataMimeType, metaMimeType, rsocketStrategies)
-				.doOnNext(factory::setupPayload)
-				.then(Mono.defer(() ->
-						factory.transport(transport)
-								.start()
-								.map(rsocket -> new DefaultRSocketRequester(
-										rsocket, dataMimeType, metaMimeType, rsocketStrategies))
-				));
+		Function<Payload, Mono<RSocket>> connectFunction;
+		if (rsocketConnectorPresent) {
+			connectFunction = payload -> new RSocketConnectorHelper().getRSocketMono(
+					this.rsocketConnectorConfigurers, this.rsocketFactoryConfigurers,
+					metaMimeType, dataMimeType, setupPayload, rsocketStrategies, transport, payload);
+		}
+		else {
+			connectFunction = payload -> new RSocketFactoryHelper().getRSocketMono(
+					this.rsocketFactoryConfigurers, metaMimeType, dataMimeType,
+					setupPayload, rsocketStrategies, transport, payload);
+		}
+
+		// In RSocket 1.0.2 we can pass a Mono for the setup Payload. Until then we have to
+		// resolve it and then cache the Mono<RSocket> because it may be a ReconnectMono.
+
+		return setupPayload
+				.map(connectFunction)
+				.cache()
+				.flatMap(mono -> mono.map(rsocket ->
+						new DefaultRSocketRequester(rsocket, dataMimeType, metaMimeType, rsocketStrategies)));
 	}
 
 	private RSocketStrategies getRSocketStrategies() {
@@ -234,7 +254,7 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 		Object data = this.setupData;
 		boolean hasMetadata = (this.setupRoute != null || !CollectionUtils.isEmpty(this.setupMetadata));
 		if (!hasMetadata && data == null) {
-			return Mono.empty();
+			return Mono.just(EMPTY_SETUP_PAYLOAD);
 		}
 
 		Mono<DataBuffer> dataMono = Mono.empty();
@@ -267,6 +287,62 @@ final class DefaultRSocketRequesterBuilder implements RSocketRequester.Builder {
 				.map(tuple -> PayloadUtils.createPayload(tuple.getT1(), tuple.getT2()))
 				.doOnDiscard(DataBuffer.class, DataBufferUtils::release)
 				.doOnDiscard(Payload.class, Payload::release);
+	}
+
+
+	@SuppressWarnings("deprecation")
+	private static class RSocketConnectorHelper {
+
+		Mono<RSocket> getRSocketMono(List<RSocketConnectorConfigurer> connectorConfigurers,
+				List<ClientRSocketFactoryConfigurer> factoryConfigurers,
+				MimeType metaMimeType, MimeType dataMimeType, Mono<Payload> setupPayload,
+				RSocketStrategies rsocketStrategies, ClientTransport transport, Payload payload) {
+
+			io.rsocket.core.RSocketConnector connector = io.rsocket.core.RSocketConnector.create();
+			connectorConfigurers.forEach(c -> c.configure(connector));
+
+			if (!factoryConfigurers.isEmpty()) {
+				io.rsocket.RSocketFactory.ClientRSocketFactory factory =
+						new io.rsocket.RSocketFactory.ClientRSocketFactory(connector);
+				factoryConfigurers.forEach(c -> c.configure(factory));
+			}
+
+			if (rsocketStrategies.dataBufferFactory() instanceof NettyDataBufferFactory) {
+				connector.payloadDecoder(PayloadDecoder.ZERO_COPY);
+			}
+
+			connector.metadataMimeType(metaMimeType.toString());
+			connector.dataMimeType(dataMimeType.toString());
+
+			if (setupPayload != EMPTY_SETUP_PAYLOAD) {
+				connector.setupPayload(payload);
+			}
+			return connector.connect(transport);
+		}
+	}
+
+
+	@SuppressWarnings("deprecation")
+	private static class RSocketFactoryHelper {
+
+		Mono<RSocket> getRSocketMono(List<ClientRSocketFactoryConfigurer> configurers,
+				MimeType metaMimeType, MimeType dataMimeType, Mono<Payload> setupPayload,
+				RSocketStrategies rsocketStrategies, ClientTransport transport, Payload payload) {
+
+			io.rsocket.RSocketFactory.ClientRSocketFactory factory = io.rsocket.RSocketFactory.connect();
+			configurers.forEach(c -> c.configure(factory));
+
+			if (rsocketStrategies.dataBufferFactory() instanceof NettyDataBufferFactory) {
+				factory.frameDecoder(PayloadDecoder.ZERO_COPY);
+			}
+
+			factory.metadataMimeType(metaMimeType.toString());
+			factory.dataMimeType(dataMimeType.toString());
+			if (setupPayload != EMPTY_SETUP_PAYLOAD) {
+				factory.setupPayload(payload);
+			}
+			return factory.transport(transport).start();
+		}
 	}
 
 }

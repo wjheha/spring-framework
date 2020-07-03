@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,13 @@ import org.springframework.core.codec.DataBufferDecoder;
 import org.springframework.core.codec.DataBufferEncoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.NettyByteBufDecoder;
+import org.springframework.core.codec.NettyByteBufEncoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.CodecConfigurer;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.FormHttpMessageReader;
@@ -53,8 +56,9 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.json.Jackson2SmileDecoder;
 import org.springframework.http.codec.json.Jackson2SmileEncoder;
+import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
-import org.springframework.http.codec.multipart.SynchronossPartHttpMessageReader;
+import org.springframework.http.codec.multipart.PartHttpMessageWriter;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
 import org.springframework.http.codec.protobuf.ProtobufHttpMessageWriter;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
@@ -79,15 +83,16 @@ public class ServerCodecConfigurerTests {
 	@Test
 	public void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertThat(readers.size()).isEqualTo(13);
+		assertThat(readers.size()).isEqualTo(14);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteArrayDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteBufferDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(DataBufferDecoder.class);
+		assertThat(getNextDecoder(readers).getClass()).isEqualTo(NettyByteBufDecoder.class);
 		assertThat(readers.get(this.index.getAndIncrement()).getClass()).isEqualTo(ResourceHttpMessageReader.class);
 		assertStringDecoder(getNextDecoder(readers), true);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ProtobufDecoder.class);
 		assertThat(readers.get(this.index.getAndIncrement()).getClass()).isEqualTo(FormHttpMessageReader.class);
-		assertThat(readers.get(this.index.getAndIncrement()).getClass()).isEqualTo(SynchronossPartHttpMessageReader.class);
+		assertThat(readers.get(this.index.getAndIncrement()).getClass()).isEqualTo(DefaultPartHttpMessageReader.class);
 		assertThat(readers.get(this.index.getAndIncrement()).getClass()).isEqualTo(MultipartHttpMessageReader.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(Jackson2JsonDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(Jackson2SmileDecoder.class);
@@ -98,13 +103,15 @@ public class ServerCodecConfigurerTests {
 	@Test
 	public void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
-		assertThat(writers.size()).isEqualTo(11);
+		assertThat(writers.size()).isEqualTo(13);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteArrayEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteBufferEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(DataBufferEncoder.class);
+		assertThat(getNextEncoder(writers).getClass()).isEqualTo(NettyByteBufEncoder.class);
 		assertThat(writers.get(index.getAndIncrement()).getClass()).isEqualTo(ResourceHttpMessageWriter.class);
 		assertStringEncoder(getNextEncoder(writers), true);
 		assertThat(writers.get(index.getAndIncrement()).getClass()).isEqualTo(ProtobufHttpMessageWriter.class);
+		assertThat(writers.get(this.index.getAndIncrement()).getClass()).isEqualTo(PartHttpMessageWriter.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jackson2JsonEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jackson2SmileEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(Jaxb2XmlEncoder.class);
@@ -129,23 +136,20 @@ public class ServerCodecConfigurerTests {
 	public void maxInMemorySize() {
 		int size = 99;
 		this.configurer.defaultCodecs().maxInMemorySize(size);
+
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertThat(readers.size()).isEqualTo(13);
 		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((ByteBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((DataBufferDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
-
-		ResourceHttpMessageReader resourceReader = (ResourceHttpMessageReader) nextReader(readers);
-		ResourceDecoder decoder = (ResourceDecoder) resourceReader.getDecoder();
-		assertThat(decoder.getMaxInMemorySize()).isEqualTo(size);
-
+		assertThat(((NettyByteBufDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((ResourceDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((StringDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
 		assertThat(((ProtobufDecoder) getNextDecoder(readers)).getMaxMessageSize()).isEqualTo(size);
 		assertThat(((FormHttpMessageReader) nextReader(readers)).getMaxInMemorySize()).isEqualTo(size);
-		assertThat(((SynchronossPartHttpMessageReader) nextReader(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((DefaultPartHttpMessageReader) nextReader(readers)).getMaxInMemorySize()).isEqualTo(size);
 
 		MultipartHttpMessageReader multipartReader = (MultipartHttpMessageReader) nextReader(readers);
-		SynchronossPartHttpMessageReader reader = (SynchronossPartHttpMessageReader) multipartReader.getPartReader();
+		DefaultPartHttpMessageReader reader = (DefaultPartHttpMessageReader) multipartReader.getPartReader();
 		assertThat((reader).getMaxInMemorySize()).isEqualTo(size);
 
 		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
@@ -155,52 +159,88 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@Test
+	public void maxInMemorySizeWithCustomCodecs() {
+
+		int size = 99;
+		this.configurer.defaultCodecs().maxInMemorySize(size);
+		this.configurer.registerDefaults(false);
+
+		CodecConfigurer.CustomCodecs customCodecs = this.configurer.customCodecs();
+		customCodecs.register(new ByteArrayDecoder());
+		customCodecs.registerWithDefaultConfig(new ByteArrayDecoder());
+		customCodecs.register(new Jackson2JsonDecoder());
+		customCodecs.registerWithDefaultConfig(new Jackson2JsonDecoder());
+
+		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
+
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(256 * 1024);
+		assertThat(((ByteArrayDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(256 * 1024);
+		assertThat(((Jackson2JsonDecoder) getNextDecoder(readers)).getMaxInMemorySize()).isEqualTo(size);
+	}
+
+	@Test
+	public void enableRequestLoggingDetails() {
+		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
+
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertThat(findCodec(readers, FormHttpMessageReader.class).isEnableLoggingRequestDetails()).isTrue();
+
+		MultipartHttpMessageReader multipartReader = findCodec(readers, MultipartHttpMessageReader.class);
+		assertThat(multipartReader.isEnableLoggingRequestDetails()).isTrue();
+
+		DefaultPartHttpMessageReader reader = (DefaultPartHttpMessageReader) multipartReader.getPartReader();
+		assertThat(reader.isEnableLoggingRequestDetails()).isTrue();
+	}
+
+	@Test
+	public void enableRequestLoggingDetailsWithCustomCodecs() {
+
+		this.configurer.registerDefaults(false);
+		this.configurer.defaultCodecs().enableLoggingRequestDetails(true);
+
+		CodecConfigurer.CustomCodecs customCodecs = this.configurer.customCodecs();
+		customCodecs.register(new FormHttpMessageReader());
+		customCodecs.registerWithDefaultConfig(new FormHttpMessageReader());
+
+		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
+		assertThat(((FormHttpMessageReader) readers.get(0)).isEnableLoggingRequestDetails()).isFalse();
+		assertThat(((FormHttpMessageReader) readers.get(1)).isEnableLoggingRequestDetails()).isTrue();
+	}
+
+	@Test
 	public void cloneConfigurer() {
 		ServerCodecConfigurer clone = this.configurer.clone();
 
-		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(new SynchronossPartHttpMessageReader());
+		MultipartHttpMessageReader reader = new MultipartHttpMessageReader(new DefaultPartHttpMessageReader());
 		Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 		clone.defaultCodecs().multipartReader(reader);
 		clone.defaultCodecs().serverSentEventEncoder(encoder);
 
 		// Clone has the customizations
 
-		HttpMessageReader<?> actualReader = clone.getReaders().stream()
-				.filter(r -> r instanceof MultipartHttpMessageReader)
-				.findFirst()
-				.get();
+		HttpMessageReader<?> actualReader =
+				findCodec(clone.getReaders(), MultipartHttpMessageReader.class);
 
-		Encoder<?> actualEncoder = clone.getWriters().stream()
-				.filter(writer -> writer instanceof ServerSentEventHttpMessageWriter)
-				.map(writer -> ((ServerSentEventHttpMessageWriter) writer).getEncoder())
-				.findFirst()
-				.get();
-
+		ServerSentEventHttpMessageWriter actualWriter =
+				findCodec(clone.getWriters(), ServerSentEventHttpMessageWriter.class);
 
 		assertThat(actualReader).isSameAs(reader);
-		assertThat(actualEncoder).isSameAs(encoder);
+		assertThat(actualWriter.getEncoder()).isSameAs(encoder);
 
 		// Original does not have the customizations
 
-		actualReader = this.configurer.getReaders().stream()
-				.filter(r -> r instanceof MultipartHttpMessageReader)
-				.findFirst()
-				.get();
-
-		actualEncoder = this.configurer.getWriters().stream()
-				.filter(writer -> writer instanceof ServerSentEventHttpMessageWriter)
-				.map(writer -> ((ServerSentEventHttpMessageWriter) writer).getEncoder())
-				.findFirst()
-				.get();
-
+		actualReader = findCodec(this.configurer.getReaders(), MultipartHttpMessageReader.class);
+		actualWriter = findCodec(this.configurer.getWriters(), ServerSentEventHttpMessageWriter.class);
 
 		assertThat(actualReader).isNotSameAs(reader);
-		assertThat(actualEncoder).isNotSameAs(encoder);
+		assertThat(actualWriter.getEncoder()).isNotSameAs(encoder);
 	}
 
 	private Decoder<?> getNextDecoder(List<HttpMessageReader<?>> readers) {
 		HttpMessageReader<?> reader = nextReader(readers);
-		assertThat(reader.getClass()).isEqualTo(DecoderHttpMessageReader.class);
+		assertThat(reader).isInstanceOf(DecoderHttpMessageReader.class);
 		return ((DecoderHttpMessageReader<?>) reader).getDecoder();
 	}
 
@@ -215,14 +255,20 @@ public class ServerCodecConfigurerTests {
 	}
 
 	@SuppressWarnings("unchecked")
+	private <T> T findCodec(List<?> codecs, Class<T> type) {
+		return (T) codecs.stream().filter(type::isInstance).findFirst().get();
+	}
+
+	@SuppressWarnings("unchecked")
 	private void assertStringDecoder(Decoder<?> decoder, boolean textOnly) {
 		assertThat(decoder.getClass()).isEqualTo(StringDecoder.class);
 		assertThat(decoder.canDecode(forClass(String.class), MimeTypeUtils.TEXT_PLAIN)).isTrue();
 		Object expected = !textOnly;
 		assertThat(decoder.canDecode(forClass(String.class), MediaType.TEXT_EVENT_STREAM)).isEqualTo(expected);
 
+		byte[] bytes = "line1\nline2".getBytes(StandardCharsets.UTF_8);
 		Flux<String> flux = (Flux<String>) decoder.decode(
-				Flux.just(new DefaultDataBufferFactory().wrap("line1\nline2".getBytes(StandardCharsets.UTF_8))),
+				Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(bytes)),
 				ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap());
 
 		assertThat(flux.collectList().block(Duration.ZERO)).isEqualTo(Arrays.asList("line1", "line2"));
