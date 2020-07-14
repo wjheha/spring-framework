@@ -78,6 +78,7 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 		this.configurers.addFormatters(registry);
 	}
 
+	// 从 WebMvcConfigurer 对象中，获得拦截器，并添加到 registry 中
 	@Override
 	protected void addInterceptors(InterceptorRegistry registry) {
 		this.configurers.addInterceptors(registry);

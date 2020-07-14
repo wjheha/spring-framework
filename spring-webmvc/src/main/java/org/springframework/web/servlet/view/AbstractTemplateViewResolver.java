@@ -23,20 +23,40 @@ package org.springframework.web.servlet.view;
  * flags for request attributes, session attributes, and Spring's macro helpers.
  *
  * @author Juergen Hoeller
- * @since 1.1
- * @see AbstractTemplateView
+ * @since 1.1AbstractTemplateView
+ * @see
  * @see org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver
  */
+// 继承 UrlBasedViewResolver 类，解析出 AbstractTemplateView 的 ViewResolver 抽象类。
 public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 
+	/**
+	 * 是否将所有 RequestAttributes 暴露给 View 使用
+	 */
 	private boolean exposeRequestAttributes = false;
 
+	/**
+	 * 当 RequestAttributes 中存在 Model 中同名的参数，是否允许使用 RequestAttributes 中的值将 Model 中的值进行覆盖
+	 *
+	 * {@link #exposeRequestAttributes}
+	 */
 	private boolean allowRequestOverride = false;
 
+	/**
+	 * 是否将 SessionAttributes 暴露给 View 使用
+	 */
 	private boolean exposeSessionAttributes = false;
 
+	/**
+	 * 当 SessionAttributes 中存在 Model 中同名的参数，是否允许使用 SessionAttributes 中的值将 Model 中的值进行覆盖
+	 *
+	 * {@link #exposeSessionAttributes}
+	 */
 	private boolean allowSessionOverride = false;
 
+	/**
+	 * 是否将 RequestContext 暴露给 view 为 spring 的宏( Macro )所使用
+	 */
 	private boolean exposeSpringMacroHelpers = true;
 
 
@@ -97,7 +117,9 @@ public class AbstractTemplateViewResolver extends UrlBasedViewResolver {
 
 	@Override
 	protected AbstractUrlBasedView buildView(String viewName) throws Exception {
+		// 调用父类方法，创建 AbstractTemplateView 对象
 		AbstractTemplateView view = (AbstractTemplateView) super.buildView(viewName);
+		// 设置相关属性
 		view.setExposeRequestAttributes(this.exposeRequestAttributes);
 		view.setAllowRequestOverride(this.allowRequestOverride);
 		view.setExposeSessionAttributes(this.exposeSessionAttributes);

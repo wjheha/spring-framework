@@ -29,6 +29,10 @@ import org.springframework.web.servlet.LocaleResolver;
  * @since 1.2.9
  * @see #setDefaultLocale
  */
+/**
+ * 实现 LocaleResolver 接口的抽象基类
+ * 提供对默认语言环境的支持
+ */
 public abstract class AbstractLocaleResolver implements LocaleResolver {
 
 	@Nullable

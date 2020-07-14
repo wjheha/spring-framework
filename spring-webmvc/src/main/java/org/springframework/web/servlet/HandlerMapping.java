@@ -53,6 +53,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
  */
+// 处理器匹配接口，根据请求( handler )获得其的处理器( handler )和拦截器们( HandlerInterceptor 数组 )。
 public interface HandlerMapping {
 
 	/**
@@ -129,6 +130,10 @@ public interface HandlerMapping {
 	 */
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
 
+	/**
+	 * 获得请求对应的处理器和拦截器们，返回的对象类型是 HandlerExecutionChain ，
+	 * 它包含处理器( handler )和拦截器们( HandlerInterceptor 数组 )
+	 */
 	/**
 	 * Return a handler and any interceptors for this request. The choice may be made
 	 * on request URL, session state, or any factor the implementing class chooses.

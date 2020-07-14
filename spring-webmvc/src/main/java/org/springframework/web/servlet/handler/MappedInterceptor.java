@@ -42,16 +42,29 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Brian Clozel
  * @since 3.0
  */
+// 实现 HandlerInterceptor 接口，支持地址匹配的 HandlerInterceptor 实现类
 public final class MappedInterceptor implements HandlerInterceptor {
 
+	/**
+	 * 匹配的路径
+	 */
 	@Nullable
 	private final String[] includePatterns;
 
+	/**
+	 * 不匹配的路径
+	 */
 	@Nullable
 	private final String[] excludePatterns;
 
+	/**
+	 * HandlerInterceptor 拦截器对象
+	 */
 	private final HandlerInterceptor interceptor;
 
+	/**
+	 * 路径匹配器
+	 */
 	@Nullable
 	private PathMatcher pathMatcher;
 
@@ -145,18 +158,21 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 */
 	public boolean matches(String lookupPath, PathMatcher pathMatcher) {
 		PathMatcher pathMatcherToUse = (this.pathMatcher != null ? this.pathMatcher : pathMatcher);
+		// 先排重
 		if (!ObjectUtils.isEmpty(this.excludePatterns)) {
 			for (String pattern : this.excludePatterns) {
-				if (pathMatcherToUse.match(pattern, lookupPath)) {
+				if (pathMatcherToUse.match(pattern, lookupPath)) {  // 匹配
 					return false;
 				}
 			}
 		}
+		// 特殊，如果包含为空，则默认就是包含
 		if (ObjectUtils.isEmpty(this.includePatterns)) {
 			return true;
 		}
+		// 后包含
 		for (String pattern : this.includePatterns) {
-			if (pathMatcherToUse.match(pattern, lookupPath)) {
+			if (pathMatcherToUse.match(pattern, lookupPath)) {  // 匹配
 				return true;
 			}
 		}

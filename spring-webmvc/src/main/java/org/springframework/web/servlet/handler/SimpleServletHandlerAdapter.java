@@ -52,10 +52,12 @@ import org.springframework.web.servlet.ModelAndView;
  * @see SimpleServletPostProcessor
  * @see org.springframework.web.servlet.mvc.ServletWrappingController
  */
+// 实现 HandlerAdapter 接口，基于 javax.servlet.Servlet 的 HandlerAdapter 实现类
 public class SimpleServletHandlerAdapter implements HandlerAdapter {
 
 	@Override
 	public boolean supports(Object handler) {
+		// 判断是 Servlet 类型
 		return (handler instanceof Servlet);
 	}
 
@@ -64,6 +66,7 @@ public class SimpleServletHandlerAdapter implements HandlerAdapter {
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
+		// Servlet 类型的调用
 		((Servlet) handler).service(request, response);
 		return null;
 	}

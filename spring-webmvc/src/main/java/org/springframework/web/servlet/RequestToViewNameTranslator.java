@@ -29,8 +29,12 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 2.0
  */
+// 请求到视图名的转换器接口
 public interface RequestToViewNameTranslator {
 
+	/**
+	 * 根据请求，获得其视图名
+	 */
 	/**
 	 * Translate the given {@link HttpServletRequest} into a view name.
 	 * @param request the incoming {@link HttpServletRequest} providing

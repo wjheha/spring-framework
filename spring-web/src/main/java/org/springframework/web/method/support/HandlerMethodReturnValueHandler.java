@@ -28,9 +28,12 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @since 3.1
  * @see HandlerMethodArgumentResolver
  */
+// HandlerMethod 的返回值的处理器接口
 public interface HandlerMethodReturnValueHandler {
 
 	/**
+	 * 是否支持该类型
+	 *
 	 * Whether the given {@linkplain MethodParameter method return type} is
 	 * supported by this handler.
 	 * @param returnType the method return type to check
@@ -40,6 +43,8 @@ public interface HandlerMethodReturnValueHandler {
 	boolean supportsReturnType(MethodParameter returnType);
 
 	/**
+	 * 处理返回值，设置到 {@param mavContainer} 中
+	 *
 	 * Handle the given return value by adding attributes to the model and
 	 * setting a view or setting the
 	 * {@link ModelAndViewContainer#setRequestHandled} flag to {@code true}

@@ -60,6 +60,8 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * @author Juergen Hoeller
  * @since 3.1
  */
+// 继承 AbstractMessageConverterMethodProcessor 抽象类，处理请求参数添加了 @RequestBody 注解，或者返回值添加了 @ResponseBody 注解的处理。
+// 这个类同时实现了 HandlerMethodArgumentResolver 和 HandlerMethodReturnValueHandler 两个接口。前者是将请求报文绑定到处理方法形参的策略接口，后者则是对处理方法返回值进行处理的策略接口
 public class RequestResponseBodyMethodProcessor extends AbstractMessageConverterMethodProcessor {
 
 	/**
@@ -173,10 +175,13 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
 			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 
+		// <1> 设置已处理
 		mavContainer.setRequestHandled(true);
+		// <2> 创建请求和响应
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
 
+		// <3> 使用 HttpMessageConverter 对对象进行转换，并写入到响应
 		// Try even with null return value. ResponseBodyAdvice could get involved.
 		writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage);
 	}

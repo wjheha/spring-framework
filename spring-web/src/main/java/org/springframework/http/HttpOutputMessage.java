@@ -29,6 +29,8 @@ import java.io.OutputStream;
  * @author Arjen Poutsma
  * @since 3.0
  */
+// 这个类是 Spring MVC 内部对一次 Http 响应报文的抽象，在 HttpMessageConverter 的 #write(...) 方法中，有一个 HttpOutputMessage 的形参，
+// 它正是 Spring MVC 的消息转换器所作用的受体“响应消息”的内部抽象，消息转换器将“响应消息”按照一定的规则写到响应报文中。
 public interface HttpOutputMessage extends HttpMessage {
 
 	/**

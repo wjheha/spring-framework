@@ -47,8 +47,12 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter
  * @see org.springframework.web.servlet.handler.SimpleServletHandlerAdapter
  */
+// 处理器适配器接口
 public interface HandlerAdapter {
 
+	/**
+	 * 是否支持该处理器
+	 */
 	/**
 	 * Given a handler instance, return whether or not this {@code HandlerAdapter}
 	 * can support it. Typical HandlerAdapters will base the decision on the handler
@@ -62,6 +66,12 @@ public interface HandlerAdapter {
 	 */
 	boolean supports(Object handler);
 
+	/**
+	 * 执行处理器，返回 ModelAndView 结果
+	 *
+	 * 因为，处理器 handler 的类型是 Object 类型，需要有一个调用者来实现 handler 是怎么被使用，怎么被执行。
+	 * 而 HandlerAdapter 的用途就在于此。可能如果接口名改成 HandlerInvoker ，笔者觉得会更好理解。
+	 */
 	/**
 	 * Use the given handler to handle this request.
 	 * The workflow that is required may vary widely.
@@ -77,6 +87,11 @@ public interface HandlerAdapter {
 	@Nullable
 	ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
 
+	/**
+	 * 返回请求的最新更新时间。
+	 *
+	 * 如果不支持该操作，则返回 -1 即可
+	 */
 	/**
 	 * Same contract as for HttpServlet's {@code getLastModified} method.
 	 * Can simply return -1 if there's no support in the handler class.

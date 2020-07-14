@@ -54,6 +54,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * @see ResponseStatus
  * @see ResponseStatusException
  */
+// 实现 MessageSourceAware 接口，继承 AbstractHandlerExceptionResolver 抽象类，基于 @ResponseStatus 提供错误响应的 HandlerExceptionResolver 实现类。
 public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionResolver implements MessageSourceAware {
 
 	@Nullable
@@ -72,15 +73,18 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
 		try {
+			// <1> 情况一，如果异常是 ResponseStatusException 类型，进行解析并设置到响应
 			if (ex instanceof ResponseStatusException) {
 				return resolveResponseStatusException((ResponseStatusException) ex, request, response, handler);
 			}
 
+			// <2> 情况二，如果有 @ResponseStatus 注解，进行解析并设置到响应
 			ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
 			if (status != null) {
 				return resolveResponseStatus(status, request, response, handler, ex);
 			}
 
+			// <3> 情况三，使用异常的 cause 再走一次情况一、情况二的逻辑。
 			if (ex.getCause() instanceof Exception) {
 				return doResolveException(request, response, handler, (Exception) ex.getCause());
 			}
@@ -147,15 +151,20 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView applyStatusAndReason(int statusCode, @Nullable String reason, HttpServletResponse response)
 			throws IOException {
 
+		// 情况一，如果无错误提示，则响应只设置状态码
 		if (!StringUtils.hasLength(reason)) {
 			response.sendError(statusCode);
 		}
+		// 情况二，如果有错误信息，则响应设置状态码 + 错误提示
 		else {
+			// 进一步解析错误提示，如果有 messageSource 的情况下
 			String resolvedReason = (this.messageSource != null ?
 					this.messageSource.getMessage(reason, null, reason, LocaleContextHolder.getLocale()) :
 					reason);
+			// 设置
 			response.sendError(statusCode, resolvedReason);
 		}
+		// 创建“空” ModelAndView 对象，并返回
 		return new ModelAndView();
 	}
 

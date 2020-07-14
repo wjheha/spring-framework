@@ -58,6 +58,8 @@ import org.springframework.web.multipart.support.MultipartResolutionDelegate;
  * @see MultipartRequest#getMultiFileMap()
  * @see MultipartRequest#getFileMap()
  */
+// 实现 HandlerMethodArgumentResolver 接口，处理带有 @RequestParam 注解，
+// 但是注解上无 name 属性的 Map 类型的参数的 RequestParamMethodArgumentResolver 实现类
 public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Override
@@ -73,6 +75,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 
 		ResolvableType resolvableType = ResolvableType.forMethodParameter(parameter);
 
+		// MultiValueMap 类型的处理
 		if (MultiValueMap.class.isAssignableFrom(parameter.getParameterType())) {
 			// MultiValueMap
 			Class<?> valueType = resolvableType.as(MultiValueMap.class).getGeneric(1).resolve();
@@ -104,6 +107,7 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 			}
 		}
 
+		// 普通 Map 类型的处理
 		else {
 			// Regular Map
 			Class<?> valueType = resolvableType.asMap().getGeneric(1).resolve();

@@ -51,8 +51,12 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.web.servlet.support.RequestContext#getLocale
  * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
  */
+// 本地化( 国际化 )解析器接口
 public interface LocaleResolver {
 
+	/**
+	 * 从请求中，解析出要使用的语言。例如，请求头的 "Accept-Language"
+	 */
 	/**
 	 * Resolve the current locale via the given request.
 	 * Can return a default locale as fallback in any case.
@@ -61,6 +65,9 @@ public interface LocaleResolver {
 	 */
 	Locale resolveLocale(HttpServletRequest request);
 
+	/**
+	 * 设置请求所使用的语言
+	 */
 	/**
 	 * Set the current locale to the given one.
 	 * @param request the request to be used for locale modification

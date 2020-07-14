@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
  * @since 3.0
  * @param <T> the converted object type
  */
+// 对消息转换器最高层次的接口抽象，描述了一个消息转换器的一般特征，我们可以从这个接口中定义的方法，来领悟Spring3.x的设计者对这一机制的思考过程
 public interface HttpMessageConverter<T> {
 
 	/**

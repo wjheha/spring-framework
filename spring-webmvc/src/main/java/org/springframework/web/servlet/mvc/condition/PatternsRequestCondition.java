@@ -42,6 +42,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
+// 继承 AbstractRequestCondition 抽象类，请求路径条件。
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 
 	private final Set<String> patterns;
