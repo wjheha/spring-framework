@@ -1235,7 +1235,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
+		// 检测BeanFactory的激活状态
 		assertBeanFactoryActive();
+		// getBeanFactory()获取到的是一个DefaultListableBeanFactory的实例
+		// 所以我们去DefaultListableBeanFactory中看一下getBean这个方法
 		return getBeanFactory().getBean(requiredType, args);
 	}
 

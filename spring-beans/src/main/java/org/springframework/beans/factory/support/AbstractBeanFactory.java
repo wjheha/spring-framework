@@ -214,6 +214,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
+	 * 当我们显示或者隐式地调用 BeanFactory#getBean(String name) 方法时，则会触发加载 Bean 阶段。
+	 * 内部调用 doGetBean(String name, final Class<T> requiredType, Object[] args, boolean typeCheckOnly) 方法，其接受四个方法参数：
+	 *   name ：要获取 Bean 的名字
+	 *   requiredType ：要获取 bean 的类型
+	 *   args ：创建 Bean 时传递的参数。这个参数仅限于创建 Bean 时使用。
+	 *   typeCheckOnly ：是否为类型检查。
+	 *
 	 * Return an instance, which may be shared or independent, of the specified bean.
 	 * @param name the name of the bean to retrieve
 	 * @param requiredType the required type of the bean to retrieve
@@ -278,9 +285,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 			// 下面这个方法：如果是普通 Bean 的话，直接返回 sharedInstance，
-			// 如果是 FactoryBean 的话，返回它创建的那个实例对象
-			// (FactoryBean 知识，读者若不清楚请移步附录)
-			// 返回对应的实例，有时候存在诸如BeanFactory的情况并不是直接返回实例本身而是返回制定方法返回的实例
+			// 如果是 FactoryBean 的话，返回它创建的那个实例对象，(FactoryBean 知识，读者若不清楚请移步附录)
+			// 返回对应的实例，有时候存在诸如BeanFactory的情况并不是直接返回实例本身而是返回指定方法返回的实例
 			// <2> 完成 FactoryBean 的相关处理，并用来获取 FactoryBean 的处理结果
 			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		}
@@ -590,6 +596,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected boolean isTypeMatch(String name, ResolvableType typeToMatch, boolean allowFactoryBeanInit)
 			throws NoSuchBeanDefinitionException {
 
+		//转换beanName   这里我们可以知道我们的beanName为factoryBeanLearn 因为上面是循环了Spring容器中的所有的Bean
 		String beanName = transformedBeanName(name);
 		boolean isFactoryDereference = BeanFactoryUtils.isFactoryDereference(name);
 
