@@ -5,12 +5,12 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans
 	   https://www.springframework.org/schema/beans/spring-beans.xsd
 	   http://www.springframework.org/schema/context
-	   https://www.springframework.org/schema/context/spring-context.xsd">
+	   http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<bean id="loginService" class="org.example.appcontext.LoginImpl"/>
 
 	<bean id="testBean" class="org.example.beanfactory.TestBean"/>
 
 	<!--	需导入Spring更多jar包才可以使用组件扫描   -->
-	<!--	<context:component-scan base-package="org.example"/>-->
+	<context:component-scan base-package="org.example.*"/>
 </beans>

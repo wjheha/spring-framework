@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.aspectj;
 
 import org.junit.jupiter.api.Test;
-
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;

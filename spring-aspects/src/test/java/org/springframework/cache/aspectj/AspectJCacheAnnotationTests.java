@@ -17,7 +17,6 @@
 package org.springframework.cache.aspectj;
 
 import org.junit.jupiter.api.Test;
-
 import org.springframework.cache.Cache;
 import org.springframework.cache.config.AbstractCacheAnnotationTests;
 import org.springframework.cache.config.CacheableService;

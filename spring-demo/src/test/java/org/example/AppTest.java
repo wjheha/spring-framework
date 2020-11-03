@@ -47,7 +47,5 @@ public class AppTest {
 		TestBean bean = (TestBean) beanFactory.getBean("testBean");
 		System.out.println(bean.getTestStr());
 		assertEquals("testStr", bean.getTestStr());
-
-
 	}
 }

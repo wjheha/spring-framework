@@ -18,7 +18,6 @@ package org.springframework.transaction.aspectj;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
