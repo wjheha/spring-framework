@@ -31,7 +31,7 @@ import javax.websocket.WebSocketContainer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -95,7 +95,7 @@ public class StandardWebSocketClient implements WebSocketClient {
 	}
 
 	private Mono<Void> executeInternal(URI url, HttpHeaders requestHeaders, WebSocketHandler handler) {
-		MonoProcessor<Void> completionMono = MonoProcessor.create();
+		Sinks.Empty<Void> completionSink = Sinks.empty();
 		return Mono.fromCallable(
 				() -> {
 					if (logger.isDebugEnabled()) {
@@ -103,19 +103,19 @@ public class StandardWebSocketClient implements WebSocketClient {
 					}
 					List<String> protocols = handler.getSubProtocols();
 					DefaultConfigurator configurator = new DefaultConfigurator(requestHeaders);
-					Endpoint endpoint = createEndpoint(url, handler, completionMono, configurator);
+					Endpoint endpoint = createEndpoint(url, handler, completionSink, configurator);
 					ClientEndpointConfig config = createEndpointConfig(configurator, protocols);
 					return this.webSocketContainer.connectToServer(endpoint, config, url);
 				})
 				.subscribeOn(Schedulers.boundedElastic()) // connectToServer is blocking
-				.then(completionMono);
+				.then(completionSink.asMono());
 	}
 
 	private StandardWebSocketHandlerAdapter createEndpoint(URI url, WebSocketHandler handler,
-			MonoProcessor<Void> completion, DefaultConfigurator configurator) {
+			Sinks.Empty<Void> completionSink, DefaultConfigurator configurator) {
 
 		return new StandardWebSocketHandlerAdapter(handler, session ->
-				createWebSocketSession(session, createHandshakeInfo(url, configurator), completion));
+				createWebSocketSession(session, createHandshakeInfo(url, configurator), completionSink));
 	}
 
 	private HandshakeInfo createHandshakeInfo(URI url, DefaultConfigurator configurator) {
@@ -124,10 +124,11 @@ public class StandardWebSocketClient implements WebSocketClient {
 		return new HandshakeInfo(url, responseHeaders, Mono.empty(), protocol);
 	}
 
-	protected StandardWebSocketSession createWebSocketSession(Session session, HandshakeInfo info,
-			MonoProcessor<Void> completion) {
+	protected StandardWebSocketSession createWebSocketSession(
+			Session session, HandshakeInfo info, Sinks.Empty<Void> completionSink) {
 
-		return new StandardWebSocketSession(session, info, DefaultDataBufferFactory.sharedInstance, completion);
+		return new StandardWebSocketSession(
+				session, info, DefaultDataBufferFactory.sharedInstance, completionSink);
 	}
 
 	private ClientEndpointConfig createEndpointConfig(Configurator configurator, List<String> subProtocols) {

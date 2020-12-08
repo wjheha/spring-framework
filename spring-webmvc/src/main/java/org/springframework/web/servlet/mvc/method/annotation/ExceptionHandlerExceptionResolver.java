@@ -48,7 +48,6 @@ import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.method.annotation.MapMethodProcessor;
-import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
@@ -343,6 +342,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			resolvers.addAll(getCustomArgumentResolvers());
 		}
 
+		// Catch-all
+		resolvers.add(new PrincipalMethodArgumentResolver());
+
 		return resolvers;
 	}
 
@@ -361,7 +363,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
 
 		// Annotation-based return value types
-		handlers.add(new ModelAttributeMethodProcessor(false));
+		handlers.add(new ServletModelAttributeMethodProcessor(false));
 		handlers.add(new RequestResponseBodyMethodProcessor(
 				getMessageConverters(), this.contentNegotiationManager, this.responseBodyAdvice));
 
@@ -375,11 +377,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		}
 
 		// Catch-all
-		handlers.add(new ModelAttributeMethodProcessor(true));
+		handlers.add(new ServletModelAttributeMethodProcessor(true));
 
 		return handlers;
 	}
 
+	@Override
+	protected boolean hasGlobalExceptionHandlers() {
+		return !this.exceptionHandlerAdviceCache.isEmpty();
+	}
 
 	/**
 	 * Find an {@code @ExceptionHandler} method and invoke it to handle the raised exception.

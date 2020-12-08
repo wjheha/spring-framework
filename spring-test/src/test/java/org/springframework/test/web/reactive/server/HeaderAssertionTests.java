@@ -23,7 +23,7 @@ import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -41,13 +41,14 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link HeaderAssertions}.
+ *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  */
-public class HeaderAssertionTests {
+class HeaderAssertionTests {
 
 	@Test
-	public void valueEquals() {
+	void valueEquals() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "bar");
 		HeaderAssertions assertions = headerAssertions(headers);
@@ -69,7 +70,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void valueEqualsWithMultipleValues() {
+	void valueEqualsWithMultipleValues() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "bar");
 		headers.add("foo", "baz");
@@ -85,11 +86,10 @@ public class HeaderAssertionTests {
 		// Too few values
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() ->
 				assertions.valueEquals("foo", "bar"));
-
 	}
 
 	@Test
-	public void valueMatches() {
+	void valueMatches() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.parseMediaType("application/json;charset=UTF-8"));
 		HeaderAssertions assertions = headerAssertions(headers);
@@ -106,7 +106,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void valuesMatch() {
+	void valuesMatch() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "value1");
 		headers.add("foo", "value2");
@@ -128,7 +128,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void valueMatcher() {
+	void valueMatcher() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "bar");
 		HeaderAssertions assertions = headerAssertions(headers);
@@ -137,7 +137,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void valuesMatcher() {
+	void valuesMatcher() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "bar");
 		headers.add("foo", "baz");
@@ -147,7 +147,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void exists() {
+	void exists() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HeaderAssertions assertions = headerAssertions(headers);
@@ -162,7 +162,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void doesNotExist() {
+	void doesNotExist() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.parseMediaType("application/json;charset=UTF-8"));
 		HeaderAssertions assertions = headerAssertions(headers);
@@ -178,7 +178,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void contentTypeCompatibleWith() {
+	void contentTypeCompatibleWith() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_XML);
 		HeaderAssertions assertions = headerAssertions(headers);
@@ -194,7 +194,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void cacheControl() {
+	void cacheControl() {
 		CacheControl control = CacheControl.maxAge(1, TimeUnit.HOURS).noTransform();
 
 		HttpHeaders headers = new HttpHeaders();
@@ -210,7 +210,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void expires() {
+	void expires() {
 		HttpHeaders headers = new HttpHeaders();
 		ZonedDateTime expires = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
 		headers.setExpires(expires);
@@ -223,7 +223,7 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
-	public void lastModified() {
+	void lastModified() {
 		HttpHeaders headers = new HttpHeaders();
 		ZonedDateTime lastModified = ZonedDateTime.of(2018, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
 		headers.setLastModified(lastModified.toInstant().toEpochMilli());
@@ -240,10 +240,9 @@ public class HeaderAssertionTests {
 		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 		response.getHeaders().putAll(responseHeaders);
 
-		MonoProcessor<byte[]> emptyContent = MonoProcessor.create();
-		emptyContent.onComplete();
+		ExchangeResult result = new ExchangeResult(
+				request, response, Mono.empty(), Mono.empty(), Duration.ZERO, null, null);
 
-		ExchangeResult result = new ExchangeResult(request, response, emptyContent, emptyContent, Duration.ZERO, null);
 		return new HeaderAssertions(result, mock(WebTestClient.ResponseSpec.class));
 	}
 

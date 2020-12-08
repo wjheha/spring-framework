@@ -53,16 +53,16 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 
 
 	/**
-	 * Create an instances with a default {@link WebsocketServerSpec.Builder}.
+	 * Create an instances with a default {@link reactor.netty.http.server.WebsocketServerSpec.Builder}.
 	 * @since 5.2.6
 	 */
 	public ReactorNettyRequestUpgradeStrategy() {
-		this(WebsocketServerSpec.builder());
+		this(WebsocketServerSpec::builder);
 	}
 
 
 	/**
-	 * Create an instance with a pre-configured {@link WebsocketServerSpec.Builder}
+	 * Create an instance with a pre-configured {@link reactor.netty.http.server.WebsocketServerSpec.Builder}
 	 * to use for WebSocket upgrades.
 	 * @since 5.2.6
 	 */
@@ -83,7 +83,7 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 		return buildSpec(null);
 	}
 
-	private WebsocketServerSpec buildSpec(@Nullable String subProtocol) {
+	WebsocketServerSpec buildSpec(@Nullable String subProtocol) {
 		WebsocketServerSpec.Builder builder = this.specBuilderSupplier.get();
 		if (subProtocol != null) {
 			builder.protocols(subProtocol);
@@ -108,7 +108,8 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 	 * @param maxFramePayloadLength the max length for frames.
 	 * @since 5.1
 	 * @deprecated as of 5.2.6 in favor of providing a supplier of
-	 * {@link WebsocketServerSpec.Builder} with a constructor argument.
+	 * {@link reactor.netty.http.server.WebsocketServerSpec.Builder} with a
+	 * constructor argument
 	 */
 	@Deprecated
 	public void setMaxFramePayloadLength(Integer maxFramePayloadLength) {
@@ -136,7 +137,8 @@ public class ReactorNettyRequestUpgradeStrategy implements RequestUpgradeStrateg
 	 * @param handlePing whether to let Ping frames through for handling
 	 * @since 5.2.4
 	 * @deprecated as of 5.2.6 in favor of providing a supplier of
-	 * {@link WebsocketServerSpec.Builder} with a constructor argument.
+	 * {@link reactor.netty.http.server.WebsocketServerSpec.Builder} with a
+	 * constructor argument
 	 */
 	@Deprecated
 	public void setHandlePing(boolean handlePing) {
