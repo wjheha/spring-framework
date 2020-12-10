@@ -17,7 +17,7 @@ public class JunitTest {
 		System.out.println("Hello World");
 	}
 
-	//报错
+	//报错，版本不兼容
 //	@org.junit.jupiter.api.Test
 //	public void test5() {
 //		System.out.println("Hello World");
