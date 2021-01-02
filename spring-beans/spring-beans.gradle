@@ -29,4 +29,14 @@ compileGroovy {
 //def deps = compileGroovy.taskDependencies.immutableValues + compileGroovy.taskDependencies.mutableValues
 //compileGroovy.dependsOn = deps - "compileJava"
 //compileKotlin.dependsOn(compileGroovy)
-compileKotlin.classpath += files(compileGroovy.destinationDir)
+//compileKotlin.classpath += files(compileGroovy.destinationDir)
+
+// 从master分支copy的代码
+tasks.named('compileGroovy') {
+	// Groovy only needs the declared dependencies (and not the result of Java compilation)
+	classpath = sourceSets.main.compileClasspath
+}
+tasks.named('compileKotlin') {
+	// Kotlin also depends on the result of Groovy compilation
+	classpath += files(sourceSets.main.groovy.classesDirectory)
+}
