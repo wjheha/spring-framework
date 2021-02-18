@@ -108,6 +108,12 @@ import org.springframework.util.ReflectionUtils;
  * @since 3.1
  * @see #onStartup(Set, ServletContext)
  * @see WebApplicationInitializer
+ *
+ * 配合 @HandleTypes 注解，通过指定Class，容器会把所有的指定类的子类作为方法onStartup 的参数Set<Class<?>> c传递进来
+ *
+ * Spring提供的ServletContainerInitializer的实现类
+ *
+ * SpringServletContainerInitializer实现了servlet容器提供的接口带了个头，接下来的事可以交由 spring自己定义的WebApplicationInitializer
  */
 @HandlesTypes(WebApplicationInitializer.class)
 public class SpringServletContainerInitializer implements ServletContainerInitializer {

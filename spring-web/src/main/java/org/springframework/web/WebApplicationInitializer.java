@@ -173,6 +173,9 @@ import javax.servlet.ServletException;
  * @see org.springframework.web.context.AbstractContextLoaderInitializer
  * @see org.springframework.web.servlet.support.AbstractDispatcherServletInitializer
  * @see org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer
+ *
+ * WebApplicationInitializer是Spring提供的接口，和ServletContainerInitializer没有直接关系，
+ * 但是和它有间接关系。WebApplicationInitializer在SpringServletContainerInitializer中实例化后被调用。
  */
 public interface WebApplicationInitializer {
 
