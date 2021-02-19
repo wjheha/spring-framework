@@ -115,6 +115,10 @@ import java.lang.annotation.Target;
  * @author Juergen Hoeller
  * @since 3.1
  * @see org.aspectj.lang.annotation.Aspect
+ *
+ * EnableAspectJAutoProxy注解使用@Import注解给容器中引入了AspectJAutoProxyRegister组件
+ * EnableAspectJAutoProxy注解使用AspectJAutoProxyRegistrar对象自定义组件，并将相应的组件添加到了IOC容器中
+ * 向Spring的配置类上添加@EnableAspectJAutoProxy注解之后，会向IOC容器中注册AnnotationAwareAspectJAutoProxyCreator，翻译过来就叫注解装配模式的AspectJ切面自动代理创建器
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

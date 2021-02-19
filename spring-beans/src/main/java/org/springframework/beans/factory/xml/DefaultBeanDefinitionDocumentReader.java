@@ -198,10 +198,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 					Element ele = (Element) node;
 					// <1.1> 如果该节点使用默认命名空间，执行默认解析
 					if (delegate.isDefaultNamespace(ele)) {
+						// 解析 default namespace 下面的几个元素
 						parseDefaultElement(ele, delegate);
 					}
 					// <1.2> 如果该节点非默认命名空间，执行自定义解析
 					else {
+						//  解析其他 namespace 的元素
 						delegate.parseCustomElement(ele);
 					}
 				}
@@ -213,6 +215,11 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 	}
 
+	/**
+	 * parseDefaultElement(ele, delegate) 代表解析的节点是 <import />、<alias />、<bean />、<beans /> 这几个
+	 * @param ele
+	 * @param delegate
+	 */
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {  //import
 			// 处理 <import /> 标签
@@ -351,11 +358,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * and registering it with the registry.
 	 */
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
-		// 进行 bean 元素解析。
-		// <1> 如果解析成功，则返回 BeanDefinitionHolder 对象。而 BeanDefinitionHolder 为 name 和 alias 的 BeanDefinition 对象
-		// 如果解析失败，则返回 null 。
+		// 将 <bean /> 节点中的信息提取出来，然后封装到一个 BeanDefinitionHolder 中。
+		// <1> 进行 bean 元素解析，如果解析成功，则返回 BeanDefinitionHolder 对象。
+		// 而 BeanDefinitionHolder 为 name 和 alias 的 BeanDefinition 对象；如果解析失败，则返回 null 。
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		if (bdHolder != null) {
+			// 如果有自定义属性的话，进行相应的解析
 			// <2> 进行自定义标签处理
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 			try {
@@ -367,6 +375,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				getReaderContext().error("Failed to register bean definition with name '" +
 						bdHolder.getBeanName() + "'", ele, ex);
 			}
+			// 注册完成后，发送事件
 			// <4> 发出响应事件，通知相关的监听器，已完成该 Bean 标签的解析。
 			// Send registration event.
 			getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));

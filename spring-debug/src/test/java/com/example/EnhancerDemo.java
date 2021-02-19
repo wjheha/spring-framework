@@ -1,6 +1,5 @@
 package com.example;
 
-import org.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;

@@ -122,9 +122,9 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		findDefinedEqualsAndHashCodeMethods(proxiedInterfaces);
 		// 调用 newProxyInstance 创建代理对象
 		return Proxy.newProxyInstance(
-				classLoader,  // 第一个是 ClassLoader
-				proxiedInterfaces,   // 第二个参数代表需要实现哪些接口
-				this   // 第三个参数最重要，是 InvocationHandler 实例，我们看到这里传了 this，因为 JdkDynamicAopProxy 本身实现了 InvocationHandler 接口
+				classLoader,  	// 第一个是 ClassLoader
+				proxiedInterfaces,  	 // 第二个参数代表需要实现哪些接口
+				this   	// 第三个参数最重要，是 InvocationHandler 实例，我们看到这里传了 this，因为 JdkDynamicAopProxy 本身实现了 InvocationHandler 接口
 		);
 	}
 
@@ -169,11 +169,13 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			// equals方法的处理
 			if (!this.equalsDefined && AopUtils.isEqualsMethod(method)) {
 				// The target does not implement the equals(Object) method itself.
+				// 代理的 equals 方法
 				return equals(args[0]);
 			}
 			// hash方法的处理
 			else if (!this.hashCodeDefined && AopUtils.isHashCodeMethod(method)) {
 				// The target does not implement the hashCode() method itself.
+				// 代理的 hashCode 方法
 				return hashCode();
 			}
 			else if (method.getDeclaringClass() == DecoratingProxy.class) {

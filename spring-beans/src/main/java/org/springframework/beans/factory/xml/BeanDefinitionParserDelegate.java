@@ -416,20 +416,19 @@ public class BeanDefinitionParserDelegate {
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
-		// <1> 计算别名集合
 		// 将 name 属性的定义按照 “逗号、分号、空格” 切分，形成一个 别名列表数组，
-		// 当然，如果你不定义 name 属性的话，就是空的了
-		// 我在附录中简单介绍了一下 id 和 name 的配置，大家可以看一眼，有个20秒就可以了
+		// 当然，如果你不定义 name 属性的话，就是空的了。
+		// <1> 计算别名集合
 		List<String> aliases = new ArrayList<>();
 		if (StringUtils.hasLength(nameAttr)) {
 			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			aliases.addAll(Arrays.asList(nameArr));
 		}
 
-		// <3.1> beanName ，优先，使用 id
+		// <3.1> beanName，优先使用 id
 		String beanName = id;
 		// 如果没有指定id, 那么用别名列表的第一个名字作为beanName
-		// <3.2> beanName ，其次，使用 aliases 的第一个
+		// <3.2> beanName ，其次使用 aliases 的第一个
 		if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
 			beanName = aliases.remove(0);
 			if (logger.isTraceEnabled()) {
@@ -446,8 +445,10 @@ public class BeanDefinitionParserDelegate {
 		// <4> 解析属性，构造 AbstractBeanDefinition 对象
 		// 根据 <bean ...>...</bean> 中的配置创建 BeanDefinition，然后把配置中的信息都设置到实例中,
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
+
 		// 到这里，整个 <bean /> 标签就算解析结束了，一个 BeanDefinition 就形成了。
 		if (beanDefinition != null) {
+			// 如果都没有设置 id 和 name，那么此时的 beanName 就会为 null
 			// <3.3> beanName ，再次，使用 beanName 生成规则
 			if (!StringUtils.hasText(beanName)) {
 				try {
@@ -482,6 +483,7 @@ public class BeanDefinitionParserDelegate {
 			}
 			// <5> 创建 BeanDefinitionHolder 对象
 			String[] aliasesArray = StringUtils.toStringArray(aliases);
+			// 返回 BeanDefinitionHolder
 			return new BeanDefinitionHolder(beanDefinition, beanName, aliasesArray);
 		}
 
@@ -1476,7 +1478,7 @@ public class BeanDefinitionParserDelegate {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
-		// 调用自定义的 Handler 处理
+		// <3> 调用自定义的 Handler 处理
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 

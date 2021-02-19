@@ -16,7 +16,6 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.Filter;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 

@@ -31,18 +31,30 @@ package org.springframework.context;
  * implemented or if the @{@link org.springframework.core.annotation.Order Order}
  * annotation is present and to sort instances accordingly if so prior to invocation.
  *
- * @author Chris Beams
- * @since 3.1
  * @param <C> the application context type
+ * @author Chris Beams
  * @see org.springframework.web.context.ContextLoader#customizeContext
  * @see org.springframework.web.context.ContextLoader#CONTEXT_INITIALIZER_CLASSES_PARAM
  * @see org.springframework.web.servlet.FrameworkServlet#setContextInitializerClasses
  * @see org.springframework.web.servlet.FrameworkServlet#applyInitializers
+ * <p>
+ * ApplicationContextInitializer是Spring框架原有的东西，
+ * 这个类的主要作用就是在ConfigurableApplicationContext类型(或者子类型)的ApplicationContext做refresh之前，
+ * 允许我们对ConfiurableApplicationContext的实例做进一步的设置和处理。
+ * <p>
+ * ApplicationContextInitializer接口是在spring容器刷新之前执行的一个回调函数。
+ * 是在ConfigurableApplicationContext#refresh() 之前调用（当spring框架内部执行 ConfigurableApplicationContext#refresh() 方法的时候或者在SpringBoot的run()执行时），
+ * 作用是初始化Spring ConfigurableApplicationContext的回调接口，通常用于需要对应用程序上下文进行编程初始化的web应用程序中。
+ * 例如，根据上下文环境注册属性源或激活概要文件。
+ * -参考ContextLoader和FrameworkServlet中支持定义contextInitializerClasses作为context-param或定义init-param。
+ * -ApplicationContextInitializer支持Order注解，表示执行顺序，越小越早执行；
+ * @since 3.1
  */
 public interface ApplicationContextInitializer<C extends ConfigurableApplicationContext> {
 
 	/**
 	 * Initialize the given application context.
+	 *
 	 * @param applicationContext the application to configure
 	 */
 	void initialize(C applicationContext);

@@ -415,16 +415,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Nullable
 	private <T> T resolveBean(ResolvableType requiredType, @Nullable Object[] args, boolean nonUniqueAsNull) {
-		//解析Bean
+		// 解析Bean
 		NamedBeanHolder<T> namedBean = resolveNamedBean(requiredType, args, nonUniqueAsNull);
 		if (namedBean != null) {
 			return namedBean.getBeanInstance();
 		}
-		//如果当前Spring容器中没有获取到相应的Bean信息，则从父容器中获取
-		//SpringMVC是一个很典型的父子容器
+		// 如果当前Spring容器中没有获取到相应的Bean信息，则从父容器中获取
+		// SpringMVC是一个很典型的父子容器
 		BeanFactory parent = getParentBeanFactory();
 		if (parent instanceof DefaultListableBeanFactory) {
-			//一个重复的调用过程，只不过BeanFactory的实例变了
+			// 一个重复的调用过程，只不过BeanFactory的实例变了
 			return ((DefaultListableBeanFactory) parent).resolveBean(requiredType, args, nonUniqueAsNull);
 		}
 		else if (parent != null) {
@@ -953,6 +953,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		// <2> 从缓存中获取指定 beanName 的 BeanDefinition
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
+
 		// <3> 如果已经存在
 		if (existingDefinition != null) {
 			// 如果存在但是不允许覆盖，抛出异常
@@ -991,7 +992,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		else {
 			// 判断是否已经有其他的 Bean 开始初始化了.
 			// 注意，"注册Bean" 这个动作结束，Bean 依然还没有初始化，我们后面会有大篇幅说初始化过程，
-			// 在 Spring 容器启动的最后，会 预初始化 所有的 singleton beans
+			// 在 Spring 容器启动的最后，会预初始化所有的 singleton beans
 			// 检测创建 Bean 阶段是否已经开启，如果开启了则需要对 beanDefinitionMap 进行并发控制
 			if (hasBeanCreationStarted()) {
 				// beanDefinitionMap 为全局变量，避免并发情况

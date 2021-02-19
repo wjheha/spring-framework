@@ -51,13 +51,10 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 		/*
 		 * 下面的三个条件简单分析一下：
 		 *
-		 *   条件1：config.isOptimize() - 是否需要优化，这个属性没怎么用过，
-		 *         细节我不是很清楚
-		 *   条件2：config.isProxyTargetClass() - 检测 proxyTargetClass 的值，
-		 *         前面的代码会设置这个值
+		 *   条件1：config.isOptimize() - 是否需要优化，这个属性没怎么用过，细节我不是很清楚
+		 *   条件2：config.isProxyTargetClass() - 检测 proxyTargetClass 的值，前面的代码会设置这个值
 		 *   条件3：hasNoUserSuppliedProxyInterfaces(config)
 		 *         - 目标 bean 是否实现了接口
-		 *
 		 *   如果被代理的目标类实现了一个或多个自定义的接口，那么就会使用 JDK 动态代理，如果没有实现任何接口，会使用 CGLIB 实现代理，
 		 *   如果设置了 proxy-target-class="true"，那么都会使用 CGLIB。
 		 *
@@ -83,11 +80,12 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 		}
 	}
 
-	// 判断是否有实现自定义的接口
 	/**
 	 * Determine whether the supplied {@link AdvisedSupport} has only the
 	 * {@link org.springframework.aop.SpringProxy} interface specified
 	 * (or no proxy interfaces specified at all).
+	 *
+	 * 判断是否有实现自定义的接口
 	 */
 	private boolean hasNoUserSuppliedProxyInterfaces(AdvisedSupport config) {
 		Class<?>[] ifcs = config.getProxiedInterfaces();

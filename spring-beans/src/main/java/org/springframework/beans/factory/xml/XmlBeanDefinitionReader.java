@@ -331,9 +331,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 		try {
 			// <2> 从 EncodedResource 获取封装的 Resource ，并从 Resource 中获取其中的 InputStream
+			// 将资源文件转为 InputStream 的 IO 流
 			InputStream inputStream = encodedResource.getResource().getInputStream();
 			try {
-				// 将资源文件转为 InputStream 的 IO 流
+				// InputStream 转 InputSource
 				InputSource inputSource = new InputSource(inputStream);
 				if (encodedResource.getEncoding() != null) {
 					inputSource.setEncoding(encodedResource.getEncoding());
@@ -397,6 +398,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 		try {
 			// <1> 获取 XML Document 实例
+			// 将 xml 文件转换为 Document 对象
 			Document doc = doLoadDocument(inputSource, resource);
 			// <2> 根据 Document 实例，注册 Bean 信息
 			int count = registerBeanDefinitions(doc, resource);
@@ -523,6 +525,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see #loadBeanDefinitions
 	 * @see #setDocumentReaderClass
 	 * @see BeanDefinitionDocumentReader#registerBeanDefinitions
+	 *
+	 * 返回从当前配置文件加载了多少数量的 Bean
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
 		// <1> 创建 BeanDefinitionDocumentReader 对象
@@ -531,7 +535,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		int countBefore = getRegistry().getBeanDefinitionCount();
 		// <3> 创建 XmlReaderContext 对象
 		// <4> 注册 BeanDefinition
-		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
+		documentReader.registerBeanDefinitions(
+				doc,
+				createReaderContext(resource)
+		);
 		// <5> 计算新注册的 BeanDefinition 数量
 		return getRegistry().getBeanDefinitionCount() - countBefore;
 	}

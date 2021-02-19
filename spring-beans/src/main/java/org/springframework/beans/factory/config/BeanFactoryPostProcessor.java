@@ -58,6 +58,18 @@ import org.springframework.beans.BeansException;
  * @since 06.07.2003
  * @see BeanPostProcessor
  * @see PropertyResourceConfigurer
+ *
+ * BeanFactoryPostProcessor 接口是 Spring 初始化 BeanFactory 时对外暴露的扩展点，
+ * Spring IoC 容器允许 BeanFactoryPostProcessor 在容器实例化任何 bean 之前读取 bean 的定义，并可以修改它。
+ *
+ * BeanFactoryPostProcessor可以对bean的定义（配置元数据）进行处理。
+ * 也就是说，Spring IoC容器允许BeanFactoryPostProcessor在容器实际实例化任何其它的bean之前读取配置元数据，
+ * 并有可能修改它。如果你愿意，你可以配置多个BeanFactoryPostProcessor。你还能通过设置'order'属性来控制BeanFactoryPostProcessor的执行次序。
+ *
+ * BeanFactoryPostProcessor：允许自定义对ApplicationContext的 bean definitions 进行修饰，扩展功能。
+ * 1、实现BeanFactoryPostProcessor 接口，会被Application contexts自动发现
+ * 2、BeanFactoryPostProcessor 仅仅对 bean definitions 发生关系，不能对bean instances 交互，对bean instances 的交互，由BeanPostProcessor的实现来处理
+ * 3、PropertyResourceConfigurer 是一个典型的实现 (PropertyResourceConfigurer是BeanFactoryPostProcessor的一个实现）
  */
 @FunctionalInterface
 public interface BeanFactoryPostProcessor {

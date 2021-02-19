@@ -52,6 +52,9 @@ import org.springframework.lang.Nullable;
  * @see #getResource
  * @see #getResourceByPath
  * @see GenericApplicationContext
+ *
+ * FileSystemXmlApplicationContext 的构造函数需要一个 xml 配置文件在系统中的路径，
+ * 其他和 ClassPathXmlApplicationContext 基本上一样
  */
 public class FileSystemXmlApplicationContext extends AbstractXmlApplicationContext {
 

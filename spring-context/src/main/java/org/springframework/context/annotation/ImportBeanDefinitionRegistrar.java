@@ -53,10 +53,16 @@ import org.springframework.core.type.AnnotationMetadata;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
- * @since 3.1
  * @see Import
  * @see ImportSelector
  * @see Configuration
+ * <p>
+ * 可以通过ImportBeanDefinitionRegistrar接口实现将自定义的组件添加到IOC容器中.ImportBeanDefinitionRegistrar本质上是一个接口。
+ * 在ImportBeanDefinitionRegistrar接口中，有一个registerBeanDefinitions()方法，通过该方法，我们可以向Spring容器中注册bean实例。
+ * Spring官方在动态注册bean时，大部分套路其实是使用ImportBeanDefinitionRegistrar接口。
+ * 所有实现了该接口的类都会被ConfigurationClassPostProcessor处理，ConfigurationClassPostProcessor实现了BeanFactoryPostProcessor接口，
+ * 所以ImportBeanDefinitionRegistrar中动态注册的bean是优先于依赖其的bean初始化的，也能被aop、validator等机制处理。
+ * @since 3.1
  */
 public interface ImportBeanDefinitionRegistrar {
 
@@ -68,20 +74,24 @@ public interface ImportBeanDefinitionRegistrar {
 	 * class processing.
 	 * <p>The default implementation delegates to
 	 * {@link #registerBeanDefinitions(AnnotationMetadata, BeanDefinitionRegistry)}.
-	 * @param importingClassMetadata annotation metadata of the importing class
-	 * @param registry current bean definition registry
+	 *
+	 * @param importingClassMetadata  annotation metadata of the importing class
+	 * @param registry                current bean definition registry
 	 * @param importBeanNameGenerator the bean name generator strategy for imported beans:
-	 * {@link ConfigurationClassPostProcessor#IMPORT_BEAN_NAME_GENERATOR} by default, or a
-	 * user-provided one if {@link ConfigurationClassPostProcessor#setBeanNameGenerator}
-	 * has been set. In the latter case, the passed-in strategy will be the same used for
-	 * component scanning in the containing application context (otherwise, the default
-	 * component-scan naming strategy is {@link AnnotationBeanNameGenerator#INSTANCE}).
-	 * @since 5.2
+	 *                                {@link ConfigurationClassPostProcessor#IMPORT_BEAN_NAME_GENERATOR} by default, or a
+	 *                                user-provided one if {@link ConfigurationClassPostProcessor#setBeanNameGenerator}
+	 *                                has been set. In the latter case, the passed-in strategy will be the same used for
+	 *                                component scanning in the containing application context (otherwise, the default
+	 *                                component-scan naming strategy is {@link AnnotationBeanNameGenerator#INSTANCE}).
 	 * @see ConfigurationClassPostProcessor#IMPORT_BEAN_NAME_GENERATOR
 	 * @see ConfigurationClassPostProcessor#setBeanNameGenerator
+	 * @since 5.2
+	 *
+	 * 可以通过调用registerBeanDefinition方法，手动注册所有需要添加到容器中的bean
 	 */
-	default void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry,
-			BeanNameGenerator importBeanNameGenerator) {
+	default void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
+										 BeanDefinitionRegistry registry,
+										 BeanNameGenerator importBeanNameGenerator) {
 
 		registerBeanDefinitions(importingClassMetadata, registry);
 	}
@@ -93,8 +103,9 @@ public interface ImportBeanDefinitionRegistrar {
 	 * registered here, due to lifecycle constraints related to {@code @Configuration}
 	 * class processing.
 	 * <p>The default implementation is empty.
+	 *
 	 * @param importingClassMetadata annotation metadata of the importing class
-	 * @param registry current bean definition registry
+	 * @param registry               current bean definition registry
 	 */
 	default void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 	}

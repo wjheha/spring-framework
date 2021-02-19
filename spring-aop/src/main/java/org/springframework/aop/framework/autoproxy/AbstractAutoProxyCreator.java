@@ -355,12 +355,13 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 		// 为目标 bean 查找合适的通知器
 		// 如果存在增强方法则创建代理
+		// 返回匹配当前 bean 的所有的 advisor、advice、interceptor,注意：如果 specificInterceptors 中有 advice 和 interceptor，它们也会被包装成 advisor
 		// Create proxy if we have advice.
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
-		// 如果获取到了增强则需要针对增强创建代理
 		/*
 		 * 若 specificInterceptors != null，即 specificInterceptors != DO_NOT_PROXY，则为 bean 生成代理对象，否则直接返回 bean
 		 */
+		// 如果获取到了增强则需要针对增强创建代理
 		if (specificInterceptors != DO_NOT_PROXY) {
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
 			// 创建代理
@@ -462,6 +463,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * already pre-configured to access the bean
 	 * @return the AOP proxy for the bean
 	 * @see #buildAdvisors
+	 *
+	 * 创建给定bean的AOP代理实例
 	 */
 	protected Object createProxy(Class<?> beanClass, @Nullable String beanName,
 			@Nullable Object[] specificInterceptors, TargetSource targetSource) {
